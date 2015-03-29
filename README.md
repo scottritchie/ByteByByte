@@ -2,7 +2,7 @@
 ByteByByte is a tool for creating message payloads. It generates Java classes for packing and unpacking classes into byte arrays or strings, and is based on Xtext (2.3.1), the Eclipse plugin for domain specific language development. It includes a nice editor with content assist, syntax highlighting, validation, and other editor features that make it easy to design message payloads. It currently runs as an Eclipse plugin. 
 
 Here's what the message definitions looks like in the editor:
-############################
+```
 grammar name Example
 
 package com.bbb.example
@@ -62,11 +62,12 @@ Enum Action {
   Active
   ShutDown
 }
-###########################
+```
 
 As you can see, the usual primitive types are supported. You can also define sub-types and enumerations. Lists of primitives and sub-types are supported. Sub-types can also be nested.
 
 To use the generated classes to create a byte array containing the HelloWorld message you would do this:
+```
 HelloWorld hw = new HelloWorld();
 hw.setGreeting("Hello World!");
 try {
@@ -75,9 +76,12 @@ try {
 catch (MissingAttributeException e) {
   e.printStackTrace();
 }
+```
 
 Now that the message is packed into a byte array you can send it to a recipient using your favorite message system. The recipient receives the message, stores it in a byte array called byteArray, and unpacks it like this:
+```
 HelloWorld tmp = new HelloWorld();
 HelloWorld hw = tmp.unpack(byteArray);
 System.out.println("greeting: " + hw.getGreeting());
+```
 
