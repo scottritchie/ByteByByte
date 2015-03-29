@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature id="com.viacron.utils.bbb.ByteByByte.sdk"
+	label="ByteByByte SDK Feature "
+	version="1.0.0.qualifier">
+	<plugin
+			id="com.viacron.utils.bbb.ByteByByte"
+			download-size="0"
+			install-size="0"
+			version="0.0.0"
+			unpack="false"/>
+	<plugin
+			id="com.viacron.utils.bbb.ByteByByte.ui"
+			download-size="0"
+			install-size="0"
+			version="0.0.0"
+			unpack="false"/>
+</feature>

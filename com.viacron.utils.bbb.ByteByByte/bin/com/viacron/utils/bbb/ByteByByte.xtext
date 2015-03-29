@@ -1,0 +1,89 @@
+/*
+ * File: ByteByByte.xtext
+ * Description: The Xtext grammar for the ByteByByte DSL.
+ * 
+ * Copyright (C) 2015  Scott Ritchie
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+grammar com.viacron.utils.bbb.ByteByByte with org.eclipse.xtext.common.Terminals
+
+generate byteByByte "http://www.viacron.com/utils/bbb/ByteByByte"
+
+Model:
+   grammarName=GrammarName
+   package=PackageDeclaration
+   rootClass=RootClass
+   (dateTimeFormat=DateTimeFormat)?
+   (messages+=Message)*
+   (subTypes+=SubType)*
+   (penums+=PEnum)*;
+
+GrammarName:
+   'grammar name' name=ID;
+
+PackageDeclaration:
+   'package' name=QualifiedName;
+
+RootClass:
+   'root' name=ID;
+
+DateTimeFormat:
+   'date/time format:' dateTimeFormat=STRING;
+
+Message:
+   'Message' name=ID '{'
+   (attributes+=AbstractAttribute)*
+   (enums+=PEnumRef)*
+   '}';
+
+AbstractAttribute:
+   Attribute | SubTypeRef;
+
+Attribute:
+   name=ID 'as' (listOf=ListOf)? attributeType=AttributeType (optional=Optional)?;
+
+enum AttributeType:
+   STRING="string" | BYTE="byte" | CHAR="char" | INT="integer" | FLOAT="float" | DOUBLE="double" | SHORT="short" |
+   LONG="long" | CALENDAR="calendar" | BOOLEAN="boolean" | XREF="XREF" | ID="ID";
+
+ListOf returns ListOF:
+   listOf='list' 'of';
+
+Optional returns Optional:
+   optional='(' 'optional' ')';
+
+SubTypeRef:
+   name=ID 'as' (listOf=ListOf)? subType=[SubType] (optional=Optional)?;
+
+PEnumRef:
+   name=ID 'as' 'enum' penum=[PEnum] (optional=Optional)?;
+
+SubType:
+   'SubType' name=ID '{'
+   (attributes+=AbstractAttribute)*
+   (enums+=PEnumRef)*
+   '}';
+
+PEnum:
+   'Enum' name=ID '{'
+   (elements+=PEnumElement)*
+   '}';
+
+PEnumElement:
+   name=ID;
+
+QualifiedName:
+   ID ('.' ID)*;

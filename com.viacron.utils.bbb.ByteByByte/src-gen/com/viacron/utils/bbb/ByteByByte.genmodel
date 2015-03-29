@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/com.viacron.utils.bbb.ByteByByte/src-gen"
+    editDirectory="/com.viacron.utils.bbb.ByteByByte.edit/src" editorDirectory="/com.viacron.utils.bbb.ByteByByte.editor/src"
+    modelPluginID="com.viacron.utils.bbb.ByteByByte" forceOverwrite="true" modelName="ByteByByte"
+    updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    complianceLevel="5.0" copyrightFields="false" editPluginID="com.viacron.utils.bbb.ByteByByte.edit"
+    editorPluginID="com.viacron.utils.bbb.ByteByByte.editor" runtimeVersion="2.7">
+  <genPackages prefix="ByteByByte" basePackage="com.viacron.utils.bbb" disposableProviderFactory="true"
+      ecorePackage="ByteByByte.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="ByteByByte.ecore#//AttributeType">
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/STRING"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/BYTE"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/CHAR"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/INT"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/FLOAT"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/DOUBLE"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/SHORT"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/LONG"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/CALENDAR"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/BOOLEAN"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/XREF"/>
+      <genEnumLiterals ecoreEnumLiteral="ByteByByte.ecore#//AttributeType/ID"/>
+    </genEnums>
+    <genClasses ecoreClass="ByteByByte.ecore#//Model">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/grammarName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/package"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/rootClass"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/dateTimeFormat"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/messages"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/subTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Model/penums"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//GrammarName">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//GrammarName/name"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//PackageDeclaration">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//PackageDeclaration/name"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//RootClass">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//RootClass/name"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//DateTimeFormat">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//DateTimeFormat/dateTimeFormat"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//Message">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//Message/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Message/attributes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//Message/enums"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//AbstractAttribute">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//AbstractAttribute/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//AbstractAttribute/listOf"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//AbstractAttribute/optional"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//Attribute">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//Attribute/attributeType"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//ListOF">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//ListOF/listOf"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//Optional">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//Optional/optional"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//SubTypeRef">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//SubTypeRef/subType"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//PEnumRef">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//PEnumRef/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//PEnumRef/penum"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//PEnumRef/optional"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//SubType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//SubType/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//SubType/attributes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//SubType/enums"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//PEnum">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//PEnum/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ByteByByte.ecore#//PEnum/elements"/>
+    </genClasses>
+    <genClasses ecoreClass="ByteByByte.ecore#//PEnumElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ByteByByte.ecore#//PEnumElement/name"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>
