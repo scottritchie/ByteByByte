@@ -1552,6 +1552,12 @@ public class JByteByByteGenerator implements IGenerator {
 						theLevel++;
 					}
 
+					toString = toString
+							.concat(getPad()
+									+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+									+ attribute.getName() + "\", offset));"
+									+ LINE_SEPARATOR);
+
 					if (attributeType == AttributeType.BOOLEAN) {
 						toString = toString.concat(getPad() + "bb = "
 								+ rootClass + "Utility.insertBitfield"
@@ -1621,18 +1627,34 @@ public class JByteByByteGenerator implements IGenerator {
 		for (PEnumRef penumRef : penumRefs) {
 			if (penumRef.getOptional() == null) {
 				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
-				int sizeInBits = log2(penumRef.getPenum().getElements().size());
 
-				toString = toString.concat(getPad() + "bb = " + rootClass
-						+ "Utility.insertBitfield(bb, offset * 8, "
-						+ sizeInBits + ", get"
-						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
-						+ LINE_SEPARATOR);
+				toString = toString
+						.concat(getPad()
+								+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+								+ penumRef.getName() + "\", offset));"
+								+ LINE_SEPARATOR);
 
-				toString = toString.concat(getPad() + "// bb = " + rootClass
-						+ "Utility.insertInteger(bb, offset, this.get"
-						+ toFirstUpper(penumRef.getName()) + "().getId());"
-						+ LINE_SEPARATOR);
+				if (sizeInBytes == 1) {
+					toString = toString.concat(getPad() + "bb = "
+							+ rootClass
+							+ "Utility.insertByte(bb, offset, (byte) this.get"
+							+ toFirstUpper(penumRef.getName()) + "().getId());"
+							+ LINE_SEPARATOR);
+				}
+				else if (sizeInBytes == 2) {
+					toString = toString.concat(getPad() + "bb = "
+							+ rootClass
+							+ "Utility.insertShort(bb, offset, (short) this.get"
+							+ toFirstUpper(penumRef.getName()) + "().getId());"
+							+ LINE_SEPARATOR);
+				} 
+				else if (sizeInBytes > 2) {
+					toString = toString.concat(getPad() + "bb = "
+							+ rootClass
+							+ "Utility.insertInteger(bb, offset, (int) this.get"
+							+ toFirstUpper(penumRef.getName()) + "().getId());"
+							+ LINE_SEPARATOR);
+				} 
 
 				toString = toString.concat(getPad() + "offset += "
 						+ sizeInBytes + ";" + LINE_SEPARATOR);
@@ -1881,6 +1903,12 @@ public class JByteByByteGenerator implements IGenerator {
 							toString = toString.concat(getPad() + "}"
 									+ LINE_SEPARATOR);
 						} else {
+							toString = toString
+									.concat(getPad()
+											+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+											+ attribute.getName()
+											+ "\", offset));" + LINE_SEPARATOR);
+
 							toString = toString.concat(getPad() + "bb = "
 									+ rootClass + "Utility.insert" + typeName
 									+ "s(bb, offset, get"
@@ -2024,12 +2052,34 @@ public class JByteByByteGenerator implements IGenerator {
 		// Insert the directory
 		toString = toString.concat(getPad() + "// Insert the directory"
 				+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "log4j.debug(String.format(\"inserting the directory at offset %d\", DIRECTORY_OFFSET));"
+						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "offset = DIRECTORY_OFFSET;"
 				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "index = 0;" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "for (" + rootClass
 				+ "DirectoryEntry directoryEntry : theDirectory) {"
 				+ LINE_SEPARATOR);
 		theLevel++;
+
+		toString = toString.concat(getPad()
+				+ "log4j.debug(String.format(\"index[%d]: \", index));"
+				+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "log4j.debug(String.format(\"  ID:     %d\", directoryEntry.getId()));"
+						+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "log4j.debug(String.format(\"  length: %d\", directoryEntry.getLength()));"
+						+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "log4j.debug(String.format(\"  offset: %d\", directoryEntry.getOffset()));"
+						+ LINE_SEPARATOR);
+
 		toString = toString.concat(getPad() + "bb = " + rootClass
 				+ "Utility.insertInteger(bb, offset, directoryEntry.getId());"
 				+ LINE_SEPARATOR);
@@ -2135,11 +2185,25 @@ public class JByteByByteGenerator implements IGenerator {
 			if (penumRef.getOptional() == null) {
 				int sizeInBits = log2(penumRef.getPenum().getElements().size());
 				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
-				// TODO
-				toString = toString.concat(getPad() + toFirstLower(className)
-						+ ".set" + toFirstUpper(penumRef.getName()) + "("
-						+ penumRef.getPenum().getName() + ".toEnum("
-						+ rootClass + "Utility.getInteger(ba, ");
+				
+				if (sizeInBytes == 1) {
+					toString = toString.concat(getPad() + toFirstLower(className)
+							+ ".set" + toFirstUpper(penumRef.getName()) + "("
+							+ penumRef.getPenum().getName() + ".toEnum("
+							+ rootClass + "Utility.getByte(ba, ");
+				}
+				else if (sizeInBytes == 2) {
+					toString = toString.concat(getPad() + toFirstLower(className)
+							+ ".set" + toFirstUpper(penumRef.getName()) + "("
+							+ penumRef.getPenum().getName() + ".toEnum("
+							+ rootClass + "Utility.getShort(ba, ");
+				}
+				else if (sizeInBytes > 2) {
+					toString = toString.concat(getPad() + toFirstLower(className)
+							+ ".set" + toFirstUpper(penumRef.getName()) + "("
+							+ penumRef.getPenum().getName() + ".toEnum("
+							+ rootClass + "Utility.getInteger(ba, ");
+				}
 				toString = toString.concat(className + "Enum."
 						+ handleCamelCase(penumRef.getName())
 						+ ".getOffsetInBits())));" + LINE_SEPARATOR);
@@ -5235,8 +5299,6 @@ public class JByteByByteGenerator implements IGenerator {
 		if (isSubType == false) {
 			// Reserve 2 bytes for the message ID.
 			offsetInBits = 16;
-		} else {
-			offsetInBits = log2(attributes.size() + penumRefs.size());
 		}
 
 		for (AbstractAttribute abstractAttribute : attributes) {
@@ -5517,6 +5579,24 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad(1) + "return lookup.get(id);"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "public static " + className + "Enum toEnum(String name) {" + LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "for (" + className + "Enum e : " + className + "Enum.values()) {" + LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "if (e.getName().equals(name)) {" + LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "return e;" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "return null;" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+
 		theLevel--;
 		toString = toString.concat(getPad() + "}");
 
@@ -6235,6 +6315,44 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "index++;" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "return byteArray;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+
+		// insertByte()
+		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ " * This method inserts a byte into a byte array at a given offset"
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * in the byte array."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ " * @param offset The offset in bytes in the byte array."
+				+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad() + " * @param b The byte value to be inserted."
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * @return The byte array."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "public static byte[] insertByte(byte[] byteArray, int offset, byte b) {"
+						+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "byte[] bytes = ByteBuffer.allocate(1).put(b).array();"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "byteArray = insertBytes(byteArray, offset, bytes);"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return byteArray;"
 				+ LINE_SEPARATOR);
