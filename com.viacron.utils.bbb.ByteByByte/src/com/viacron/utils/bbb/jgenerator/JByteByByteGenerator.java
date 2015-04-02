@@ -8865,6 +8865,17 @@ public class JByteByByteGenerator implements IGenerator {
 			}
 			toString = toString.concat(LINE_SEPARATOR);
 		}
+		
+		for (PEnumRef penumRef : penumRefs) {
+			toString = toString.concat(getPad() + "if ("
+					+ toFirstLower(className) + ".get" + toFirstUpper(penumRef.getName())
+					+ "() != this.get" + toFirstUpper(penumRef.getName()) + "()) {"
+					+ LINE_SEPARATOR);
+			toString = toString.concat(getPad(1) + "return false;"
+					+ LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+			toString = toString.concat(LINE_SEPARATOR);
+		}
 		toString = toString.concat(getPad() + "return true;" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
