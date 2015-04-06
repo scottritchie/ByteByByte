@@ -1299,6 +1299,26 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 	}
 
+	private String buildMissingAttributeExceptionString(String attribute) {
+		theLevel++;
+		String exceptionString = getPad()
+				+ "// Missing required attribute, generate an error message and throw an exception"
+				+ LINE_SEPARATOR;
+		exceptionString = exceptionString.concat(getPad()
+				+ "setErrorMsg(\"Error packing object. The attribute \\\""
+				+ attribute
+				+ "\\\" is required, but no value was provided.\");"
+				+ LINE_SEPARATOR);
+		exceptionString = exceptionString.concat(getPad()
+				+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
+		exceptionString = exceptionString.concat(getPad()
+				+ "throw new MissingAttributeException(getErrorMsg());"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		
+		return exceptionString;
+	}
+
 	private String buildValidationLogic(AbstractAttribute parent,
 			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs) {
 		if (prefix.length() == 0) {
@@ -1635,26 +1655,27 @@ public class JByteByByteGenerator implements IGenerator {
 								+ LINE_SEPARATOR);
 
 				if (sizeInBytes == 1) {
-					toString = toString.concat(getPad() + "bb = "
-							+ rootClass
+					toString = toString.concat(getPad() + "bb = " + rootClass
 							+ "Utility.insertByte(bb, offset, (byte) this.get"
 							+ toFirstUpper(penumRef.getName()) + "().getId());"
 							+ LINE_SEPARATOR);
+				} else if (sizeInBytes == 2) {
+					toString = toString
+							.concat(getPad()
+									+ "bb = "
+									+ rootClass
+									+ "Utility.insertShort(bb, offset, (short) this.get"
+									+ toFirstUpper(penumRef.getName())
+									+ "().getId());" + LINE_SEPARATOR);
+				} else if (sizeInBytes > 2) {
+					toString = toString
+							.concat(getPad()
+									+ "bb = "
+									+ rootClass
+									+ "Utility.insertInteger(bb, offset, (int) this.get"
+									+ toFirstUpper(penumRef.getName())
+									+ "().getId());" + LINE_SEPARATOR);
 				}
-				else if (sizeInBytes == 2) {
-					toString = toString.concat(getPad() + "bb = "
-							+ rootClass
-							+ "Utility.insertShort(bb, offset, (short) this.get"
-							+ toFirstUpper(penumRef.getName()) + "().getId());"
-							+ LINE_SEPARATOR);
-				} 
-				else if (sizeInBytes > 2) {
-					toString = toString.concat(getPad() + "bb = "
-							+ rootClass
-							+ "Utility.insertInteger(bb, offset, (int) this.get"
-							+ toFirstUpper(penumRef.getName()) + "().getId());"
-							+ LINE_SEPARATOR);
-				} 
 
 				toString = toString.concat(getPad() + "offset += "
 						+ sizeInBytes + ";" + LINE_SEPARATOR);
@@ -2185,22 +2206,23 @@ public class JByteByByteGenerator implements IGenerator {
 			if (penumRef.getOptional() == null) {
 				int sizeInBits = log2(penumRef.getPenum().getElements().size());
 				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
-				
+
 				if (sizeInBytes == 1) {
-					toString = toString.concat(getPad() + toFirstLower(className)
-							+ ".set" + toFirstUpper(penumRef.getName()) + "("
+					toString = toString.concat(getPad()
+							+ toFirstLower(className) + ".set"
+							+ toFirstUpper(penumRef.getName()) + "("
 							+ penumRef.getPenum().getName() + ".toEnum("
 							+ rootClass + "Utility.getByte(ba, ");
-				}
-				else if (sizeInBytes == 2) {
-					toString = toString.concat(getPad() + toFirstLower(className)
-							+ ".set" + toFirstUpper(penumRef.getName()) + "("
+				} else if (sizeInBytes == 2) {
+					toString = toString.concat(getPad()
+							+ toFirstLower(className) + ".set"
+							+ toFirstUpper(penumRef.getName()) + "("
 							+ penumRef.getPenum().getName() + ".toEnum("
 							+ rootClass + "Utility.getShort(ba, ");
-				}
-				else if (sizeInBytes > 2) {
-					toString = toString.concat(getPad() + toFirstLower(className)
-							+ ".set" + toFirstUpper(penumRef.getName()) + "("
+				} else if (sizeInBytes > 2) {
+					toString = toString.concat(getPad()
+							+ toFirstLower(className) + ".set"
+							+ toFirstUpper(penumRef.getName()) + "("
 							+ penumRef.getPenum().getName() + ".toEnum("
 							+ rootClass + "Utility.getInteger(ba, ");
 				}
@@ -4288,26 +4310,6 @@ public class JByteByByteGenerator implements IGenerator {
 			headerString = headerString.concat(getPad() + " */"
 					+ LINE_SEPARATOR);
 
-			String exceptionString = getPad() + "else {" + LINE_SEPARATOR;
-			theLevel++;
-			exceptionString = exceptionString
-					.concat(getPad()
-							+ "// Missing required attribute, generate an error message and throw an exception"
-							+ LINE_SEPARATOR);
-			exceptionString = exceptionString.concat(getPad()
-					+ "setErrorMsg(\"Error packing object. The attribute \\\""
-					+ abstractAttribute.getName()
-					+ "\\\" is required, but no value was provided.\");"
-					+ LINE_SEPARATOR);
-			exceptionString = exceptionString.concat(getPad()
-					+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
-			exceptionString = exceptionString.concat(getPad()
-					+ "throw new MissingAttributeException(getErrorMsg());"
-					+ LINE_SEPARATOR);
-			theLevel--;
-			exceptionString = exceptionString.concat(getPad() + "}"
-					+ LINE_SEPARATOR);
-
 			if (abstractAttribute instanceof Attribute) {
 				Attribute attribute = (Attribute) abstractAttribute;
 
@@ -4398,14 +4400,16 @@ public class JByteByByteGenerator implements IGenerator {
 										+ "List != null) {" + LINE_SEPARATOR);
 						theLevel++;
 						attributeInitString = attributeInitString
-								.concat(getPad() + "int index" + attributeName
-										+ " = 0;" + LINE_SEPARATOR);
+								.concat(getPad() + "int index"
+										+ toFirstUpper(attributeName) + " = 0;"
+										+ LINE_SEPARATOR);
 						attributeInitString = attributeInitString
 								.concat(getPad() + "for ("
 										+ subTypeRef.getSubType().getName()
 										+ " " + toFirstLower(attributeName)
 										+ " : " + toFirstLower(attributeName)
 										+ "List) {" + LINE_SEPARATOR);
+						theLevel++;
 						attributeInitString = attributeInitString
 								.concat(getPad() + "Initialize"
 										+ subTypeRef.getSubType().getName()
@@ -4422,7 +4426,8 @@ public class JByteByByteGenerator implements IGenerator {
 										+ subTypeRef.getSubType().getName()
 										+ ".initialize(\""
 										+ toFirstLower(attributeName)
-										+ "[\" + index" + attributeName
+										+ "[\" + index"
+										+ toFirstUpper(attributeName)
 										+ " + \"]\");" + LINE_SEPARATOR);
 						attributeInitString = attributeInitString
 								.concat(getPad()
@@ -4430,16 +4435,24 @@ public class JByteByByteGenerator implements IGenerator {
 										+ toFirstLower(attributeName)
 										+ "Element);" + LINE_SEPARATOR);
 						attributeInitString = attributeInitString
-								.concat(getPad() + "index" + attributeName
-										+ "++;" + LINE_SEPARATOR);
+								.concat(getPad() + "index"
+										+ toFirstUpper(attributeName) + "++;"
+										+ LINE_SEPARATOR);
+						theLevel--;
 						attributeInitString = attributeInitString
 								.concat(getPad() + "}" + LINE_SEPARATOR);
 						theLevel--;
 						attributeInitString = attributeInitString
 								.concat(getPad() + "}" + LINE_SEPARATOR);
+
 						if (subTypeRef.getOptional() == null) {
 							attributeInitString = attributeInitString
-									.concat(exceptionString);
+									.concat(getPad() + "else {"
+											+ LINE_SEPARATOR);
+							attributeInitString = attributeInitString
+									.concat(buildMissingAttributeExceptionString(attributeName));
+							attributeInitString = attributeInitString
+									.concat(getPad() + "}" + LINE_SEPARATOR);
 						}
 						attributeInitString = attributeInitString
 								.concat(getPad() + "return abstractAttribute;"
@@ -4495,7 +4508,12 @@ public class JByteByByteGenerator implements IGenerator {
 								.concat(getPad() + "}" + LINE_SEPARATOR);
 						if (subTypeRef.getOptional() == null) {
 							attributeInitString = attributeInitString
-									.concat(exceptionString);
+									.concat(getPad() + "else {"
+											+ LINE_SEPARATOR);
+							attributeInitString = attributeInitString
+									.concat(buildMissingAttributeExceptionString(attributeName));
+							attributeInitString = attributeInitString
+									.concat(getPad() + "}" + LINE_SEPARATOR);
 						}
 						attributeInitString = attributeInitString
 								.concat(getPad() + "return abstractAttribute;"
@@ -4653,22 +4671,8 @@ public class JByteByByteGenerator implements IGenerator {
 		if (attribute.getOptional() == null) {
 			attributeInitString = attributeInitString.concat(getPad()
 					+ "else {" + LINE_SEPARATOR);
-			theLevel++;
 			attributeInitString = attributeInitString
-					.concat(getPad()
-							+ "// Missing required attribute, generate an error message and throw an exception"
-							+ LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat(getPad()
-					+ "setErrorMsg(\"Error packing object. The attribute \\\""
-					+ attribute.getName()
-					+ "\\\" is required, but no value was provided.\");"
-					+ LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat(getPad()
-					+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat(getPad()
-					+ "throw new MissingAttributeException(getErrorMsg());"
-					+ LINE_SEPARATOR);
-			theLevel--;
+					.concat(buildMissingAttributeExceptionString(attribute.getName()));
 			attributeInitString = attributeInitString.concat(getPad() + "}"
 					+ LINE_SEPARATOR);
 		}
@@ -4823,9 +4827,10 @@ public class JByteByByteGenerator implements IGenerator {
 			}
 
 			if (isRecursive == false && isRecursiveList == false) {
-				attributeInitString = attributeInitString.concat("if (" + name
-						+ ".get" + attributeName + "() != null) {"
-						+ LINE_SEPARATOR);
+				attributeInitString = attributeInitString.concat(getPad()
+						+ "if (" + name + ".get" + attributeName
+						+ "() != null) {" + LINE_SEPARATOR);
+				theLevel++;
 				attributeInitString = attributeInitString.concat(getPad()
 						+ "AbstractAttribute abstractAttribute = initialize"
 						+ attributeName + "(" + name + ".get" + attributeName
@@ -4834,32 +4839,18 @@ public class JByteByByteGenerator implements IGenerator {
 						.concat(getPad()
 								+ "element.getAbstractAttributes().add(abstractAttribute);"
 								+ LINE_SEPARATOR);
-				attributeInitString = attributeInitString.concat("}");
+				theLevel--;
+				attributeInitString = attributeInitString
+						.concat(getPad() + "}");
 
 				if (abstractAttribute.getOptional() != null) {
 					attributeInitString = attributeInitString
 							.concat(LINE_SEPARATOR);
 				} else {
-					attributeInitString = attributeInitString.concat(" else {"
-							+ LINE_SEPARATOR);
-					theLevel++;
-					attributeInitString = attributeInitString
-							.concat(getPad()
-									+ "// Missing required attribute, generate an error message and throw an exception"
-									+ LINE_SEPARATOR);
-					attributeInitString = attributeInitString
-							.concat(getPad()
-									+ "setErrorMsg(\"Error packing object. The attribute \\\""
-									+ toFirstLower(attributeName)
-									+ "\\\" is required, but no value was provided.\");"
-									+ LINE_SEPARATOR);
 					attributeInitString = attributeInitString.concat(getPad()
-							+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
+							+ " else {" + LINE_SEPARATOR);	
 					attributeInitString = attributeInitString
-							.concat(getPad()
-									+ "throw new MissingAttributeException(getErrorMsg());"
-									+ LINE_SEPARATOR);
-					theLevel--;
+							.concat(buildMissingAttributeExceptionString( toFirstLower(attributeName)));
 					attributeInitString = attributeInitString.concat(getPad()
 							+ "}" + LINE_SEPARATOR);
 				}
@@ -4933,23 +4924,8 @@ public class JByteByByteGenerator implements IGenerator {
 			} else {
 				attributeInitString = attributeInitString.concat(" else {"
 						+ LINE_SEPARATOR);
-				theLevel++;
 				attributeInitString = attributeInitString
-						.concat(getPad()
-								+ "// Missing required attribute, generate an error message and throw an exception"
-								+ LINE_SEPARATOR);
-				attributeInitString = attributeInitString
-						.concat(getPad()
-								+ "setErrorMsg(\"Error packing object. The attribute \\\""
-								+ penumRef.getName()
-								+ "\\\" is required, but no value was provided.\");"
-								+ LINE_SEPARATOR);
-				attributeInitString = attributeInitString.concat(getPad()
-						+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
-				attributeInitString = attributeInitString.concat(getPad()
-						+ "throw new MissingAttributeException(getErrorMsg());"
-						+ LINE_SEPARATOR);
-				theLevel--;
+						.concat(buildMissingAttributeExceptionString(penumRef.getName()));
 				attributeInitString = attributeInitString.concat(getPad() + "}"
 						+ LINE_SEPARATOR);
 			}
@@ -5109,22 +5085,8 @@ public class JByteByByteGenerator implements IGenerator {
 		if (penumRef.getOptional() == null) {
 			attributeInitString = attributeInitString.concat(getPad()
 					+ "else {" + LINE_SEPARATOR);
-			theLevel++;
 			attributeInitString = attributeInitString
-					.concat(getPad()
-							+ "// Missing required attribute, generate an error message and throw an exception"
-							+ LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat(getPad()
-					+ "setErrorMsg(\"Error packing object. The attribute \\\""
-					+ penumRef.getName()
-					+ "\\\" is required, but no value was provided.\");"
-					+ LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat(getPad()
-					+ "   log4j.error(getErrorMsg());" + LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat(getPad()
-					+ "throw new MissingAttributeException(getErrorMsg());"
-					+ LINE_SEPARATOR);
-			theLevel--;
+					.concat(buildMissingAttributeExceptionString(penumRef.getName()));
 			attributeInitString = attributeInitString.concat(getPad() + "}"
 					+ LINE_SEPARATOR);
 		}
@@ -5581,11 +5543,14 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 
 		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "public static " + className + "Enum toEnum(String name) {" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "public static " + className
+				+ "Enum toEnum(String name) {" + LINE_SEPARATOR);
 		theLevel++;
-		toString = toString.concat(getPad() + "for (" + className + "Enum e : " + className + "Enum.values()) {" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "for (" + className + "Enum e : "
+				+ className + "Enum.values()) {" + LINE_SEPARATOR);
 		theLevel++;
-		toString = toString.concat(getPad() + "if (e.getName().equals(name)) {" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "if (e.getName().equals(name)) {"
+				+ LINE_SEPARATOR);
 		theLevel++;
 		toString = toString.concat(getPad() + "return e;" + LINE_SEPARATOR);
 		theLevel--;
@@ -8865,11 +8830,12 @@ public class JByteByByteGenerator implements IGenerator {
 			}
 			toString = toString.concat(LINE_SEPARATOR);
 		}
-		
+
 		for (PEnumRef penumRef : penumRefs) {
 			toString = toString.concat(getPad() + "if ("
-					+ toFirstLower(className) + ".get" + toFirstUpper(penumRef.getName())
-					+ "() != this.get" + toFirstUpper(penumRef.getName()) + "()) {"
+					+ toFirstLower(className) + ".get"
+					+ toFirstUpper(penumRef.getName()) + "() != this.get"
+					+ toFirstUpper(penumRef.getName()) + "()) {"
 					+ LINE_SEPARATOR);
 			toString = toString.concat(getPad(1) + "return false;"
 					+ LINE_SEPARATOR);
