@@ -1,0 +1,333 @@
+03-07-2015 15:08:46.316 INFO  TestBtoB:315 - Logging initialized
+03-07-2015 15:08:46.331 DEBUG TestBtoB:118 - user: the user
+03-07-2015 15:08:46.331 DEBUG TestBtoB:119 - msg: test message
+03-07-2015 15:08:46.331 DEBUG TestBtoB:120 - timestamp: 305419896
+03-07-2015 15:08:46.331 DEBUG TestBtoB:121 - dud1: 255
+03-07-2015 15:08:46.331 DEBUG TestBtoB:122 - dud2: 123.45
+03-07-2015 15:08:46.331 DEBUG TestBtoB:123 - dud3: 6.789
+03-07-2015 15:08:46.331 DEBUG TestBtoB:124 - dud4: x
+03-07-2015 15:08:46.331 DEBUG TestBtoB:125 - dud5: true
+03-07-2015 15:08:46.331 DEBUG TestBtoB:126 - dud6: -1
+03-07-2015 15:08:46.331 DEBUG TestBtoB:127 - dud7: 1425758926316
+03-07-2015 15:08:46.331 DEBUG TestBtoB:128 - action: DELETE
+03-07-2015 15:08:46.331 DEBUG TestBtoB:131 - variable.datatype: Some datatype1
+03-07-2015 15:08:46.331 DEBUG TestBtoB:132 - variable.multi: true
+03-07-2015 15:08:46.331 DEBUG TestBtoB:133 - variable.name: My Name1
+03-07-2015 15:08:46.331 DEBUG TestBtoB:131 - variable.datatype: Some datatype2
+03-07-2015 15:08:46.331 DEBUG TestBtoB:132 - variable.multi: true
+03-07-2015 15:08:46.331 DEBUG TestBtoB:133 - variable.name: My Name2
+03-07-2015 15:08:46.331 DEBUG TestBtoB:138 - someBooleans[0]: true
+03-07-2015 15:08:46.331 DEBUG TestBtoB:138 - someBooleans[1]: false
+03-07-2015 15:08:46.331 DEBUG TestBtoB:138 - someBooleans[2]: true
+03-07-2015 15:08:46.331 DEBUG TestBtoB:138 - someBooleans[3]: false
+03-07-2015 15:08:46.331 DEBUG TestBtoB:138 - someBooleans[4]: true
+03-07-2015 15:08:46.331 DEBUG TestBtoB:144 - someBytes[0]: 10
+03-07-2015 15:08:46.331 DEBUG TestBtoB:144 - someBytes[1]: 11
+03-07-2015 15:08:46.331 DEBUG TestBtoB:144 - someBytes[2]: 12
+03-07-2015 15:08:46.331 DEBUG TestBtoB:144 - someBytes[3]: 13
+03-07-2015 15:08:46.331 DEBUG TestBtoB:144 - someBytes[4]: 14
+03-07-2015 15:08:46.331 DEBUG TestBtoB:150 - someChars[0]: a
+03-07-2015 15:08:46.331 DEBUG TestBtoB:150 - someChars[1]: b
+03-07-2015 15:08:46.331 DEBUG TestBtoB:150 - someChars[2]: c
+03-07-2015 15:08:46.331 DEBUG TestBtoB:150 - someChars[3]: d
+03-07-2015 15:08:46.331 DEBUG TestBtoB:150 - someChars[4]: e
+03-07-2015 15:08:46.331 DEBUG TestBtoB:156 - someInts[0]: 1
+03-07-2015 15:08:46.331 DEBUG TestBtoB:156 - someInts[1]: 2
+03-07-2015 15:08:46.331 DEBUG TestBtoB:156 - someInts[2]: 3
+03-07-2015 15:08:46.331 DEBUG TestBtoB:156 - someInts[3]: 4
+03-07-2015 15:08:46.331 DEBUG TestBtoB:156 - someInts[4]: 5
+03-07-2015 15:08:46.347 DEBUG TestBtoB:162 - someFloats[0]: 1.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:162 - someFloats[1]: 2.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:162 - someFloats[2]: 3.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:162 - someFloats[3]: 4.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:162 - someFloats[4]: 5.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:168 - someLongs[0]: -1
+03-07-2015 15:08:46.347 DEBUG TestBtoB:168 - someLongs[1]: -2
+03-07-2015 15:08:46.347 DEBUG TestBtoB:168 - someLongs[2]: -3
+03-07-2015 15:08:46.347 DEBUG TestBtoB:168 - someLongs[3]: -4
+03-07-2015 15:08:46.347 DEBUG TestBtoB:168 - someLongs[4]: -5
+03-07-2015 15:08:46.347 DEBUG TestBtoB:174 - someShorts[0]: 1
+03-07-2015 15:08:46.347 DEBUG TestBtoB:174 - someShorts[1]: 2
+03-07-2015 15:08:46.347 DEBUG TestBtoB:174 - someShorts[2]: 3
+03-07-2015 15:08:46.347 DEBUG TestBtoB:174 - someShorts[3]: 4
+03-07-2015 15:08:46.347 DEBUG TestBtoB:174 - someShorts[4]: 5
+03-07-2015 15:08:46.347 DEBUG TestBtoB:180 - someDoubles[0]: -6.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:180 - someDoubles[1]: 7.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:180 - someDoubles[2]: -8.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:180 - someDoubles[3]: 9.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:180 - someDoubles[4]: -10.000000
+03-07-2015 15:08:46.347 DEBUG TestBtoB:186 - someStrings[0]: 1string
+03-07-2015 15:08:46.347 DEBUG TestBtoB:186 - someStrings[1]: 2string
+03-07-2015 15:08:46.347 DEBUG TestBtoB:186 - someStrings[2]: 3string
+03-07-2015 15:08:46.347 DEBUG TestBtoB:186 - someStrings[3]: 4string
+03-07-2015 15:08:46.347 DEBUG TestBtoB:186 - someStrings[4]: 5string
+03-07-2015 15:08:46.347 DEBUG Chat:275 - Entered pack()
+03-07-2015 15:08:46.347 DEBUG Chat:278 - byteArraySize: 553
+03-07-2015 15:08:46.347 DEBUG Chat:345 - inserting user at offset 246
+03-07-2015 15:08:46.347 DEBUG Chat:350 - inserting msg at offset 254
+03-07-2015 15:08:46.347 DEBUG Chat:355 - inserting someBooleans at offset 266
+03-07-2015 15:08:46.347 DEBUG Chat:360 - inserting someBytes at offset 271
+03-07-2015 15:08:46.347 DEBUG Chat:365 - inserting someChars at offset 276
+03-07-2015 15:08:46.347 DEBUG Chat:370 - inserting someInts at offset 286
+03-07-2015 15:08:46.347 DEBUG Chat:375 - inserting someFloats at offset 306
+03-07-2015 15:08:46.347 DEBUG Chat:380 - inserting someLongs at offset 326
+03-07-2015 15:08:46.347 DEBUG Chat:385 - inserting someShorts at offset 366
+03-07-2015 15:08:46.347 DEBUG Chat:390 - inserting someStrings at offset 376
+03-07-2015 15:08:46.347 DEBUG Chat:406 - inserting someDoubles at offset 411
+03-07-2015 15:08:46.347 DEBUG Chat:411 - inserting variables at offset 451
+03-07-2015 15:08:46.347 DEBUG Variable:128 - Entered pack()
+03-07-2015 15:08:46.347 DEBUG Variable:131 - byteArraySize: 47
+03-07-2015 15:08:46.347 DEBUG Variable:170 - inserting name at offset 25
+03-07-2015 15:08:46.347 DEBUG Variable:175 - inserting datatype at offset 33
+03-07-2015 15:08:46.347 DEBUG Variable:195 - Leaving pack()
+03-07-2015 15:08:46.347 DEBUG Variable:128 - Entered pack()
+03-07-2015 15:08:46.347 DEBUG Variable:131 - byteArraySize: 47
+03-07-2015 15:08:46.347 DEBUG Variable:170 - inserting name at offset 25
+03-07-2015 15:08:46.347 DEBUG Variable:175 - inserting datatype at offset 33
+03-07-2015 15:08:46.347 DEBUG Variable:195 - Leaving pack()
+03-07-2015 15:08:46.347 DEBUG Chat:443 - Leaving pack()
+03-07-2015 15:08:46.362 DEBUG GreenballMessages:2004 - Entered peek()
+03-07-2015 15:08:46.362 DEBUG GreenballMessages:2012 - ID: 8 (Chat)
+03-07-2015 15:08:46.362 DEBUG GreenballMessages:2016 - Leaving peek()
+03-07-2015 15:08:46.362 DEBUG TestBtoB:193 - ID: 8 (Chat)
+03-07-2015 15:08:46.362 DEBUG Chat:456 - Entered unpack()
+03-07-2015 15:08:46.362 DEBUG Chat:562 - Leaving unpack()
+03-07-2015 15:08:46.362 DEBUG TestBtoB:217 - user: the user
+03-07-2015 15:08:46.362 DEBUG TestBtoB:218 - msg: test message
+03-07-2015 15:08:46.362 DEBUG TestBtoB:219 - timestamp: 305419896
+03-07-2015 15:08:46.362 DEBUG TestBtoB:220 - dud1: 255
+03-07-2015 15:08:46.362 DEBUG TestBtoB:221 - dud2: 123.45
+03-07-2015 15:08:46.362 DEBUG TestBtoB:222 - dud3: 6.789
+03-07-2015 15:08:46.362 DEBUG TestBtoB:223 - dud4: x
+03-07-2015 15:08:46.362 DEBUG TestBtoB:224 - dud5: true
+03-07-2015 15:08:46.362 DEBUG TestBtoB:225 - dud6: -1
+03-07-2015 15:08:46.362 DEBUG TestBtoB:226 - dud7: 1425758926316
+03-07-2015 15:08:46.362 DEBUG TestBtoB:227 - action: DELETE
+03-07-2015 15:08:46.362 DEBUG TestBtoB:235 - valid checksum: true
+03-07-2015 15:08:46.362 DEBUG TestBtoB:239 - chat2.getSomeBooleans().size: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:242 - someBooleans[0]: true
+03-07-2015 15:08:46.362 DEBUG TestBtoB:242 - someBooleans[1]: false
+03-07-2015 15:08:46.362 DEBUG TestBtoB:242 - someBooleans[2]: true
+03-07-2015 15:08:46.362 DEBUG TestBtoB:242 - someBooleans[3]: false
+03-07-2015 15:08:46.362 DEBUG TestBtoB:242 - someBooleans[4]: true
+03-07-2015 15:08:46.362 DEBUG TestBtoB:247 - chat2.getSomeBytes().size: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:250 - someBytes[0]: 10
+03-07-2015 15:08:46.362 DEBUG TestBtoB:250 - someBytes[1]: 11
+03-07-2015 15:08:46.362 DEBUG TestBtoB:250 - someBytes[2]: 12
+03-07-2015 15:08:46.362 DEBUG TestBtoB:250 - someBytes[3]: 13
+03-07-2015 15:08:46.362 DEBUG TestBtoB:250 - someBytes[4]: 14
+03-07-2015 15:08:46.362 DEBUG TestBtoB:256 - someChars[0]: a
+03-07-2015 15:08:46.362 DEBUG TestBtoB:256 - someChars[1]: b
+03-07-2015 15:08:46.362 DEBUG TestBtoB:256 - someChars[2]: c
+03-07-2015 15:08:46.362 DEBUG TestBtoB:256 - someChars[3]: d
+03-07-2015 15:08:46.362 DEBUG TestBtoB:256 - someChars[4]: e
+03-07-2015 15:08:46.362 DEBUG TestBtoB:261 - chat2.getSomeInts().size: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:264 - someInts[0]: 1
+03-07-2015 15:08:46.362 DEBUG TestBtoB:264 - someInts[1]: 2
+03-07-2015 15:08:46.362 DEBUG TestBtoB:264 - someInts[2]: 3
+03-07-2015 15:08:46.362 DEBUG TestBtoB:264 - someInts[3]: 4
+03-07-2015 15:08:46.362 DEBUG TestBtoB:264 - someInts[4]: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:269 - chat2.getSomeShorts().size: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:272 - someShorts[0]: 1
+03-07-2015 15:08:46.362 DEBUG TestBtoB:272 - someShorts[1]: 2
+03-07-2015 15:08:46.362 DEBUG TestBtoB:272 - someShorts[2]: 3
+03-07-2015 15:08:46.362 DEBUG TestBtoB:272 - someShorts[3]: 4
+03-07-2015 15:08:46.362 DEBUG TestBtoB:272 - someShorts[4]: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:277 - chat2.getSomeFloats().size: 5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:280 - someFloats[0]: 1.000000
+03-07-2015 15:08:46.362 DEBUG TestBtoB:280 - someFloats[1]: 2.000000
+03-07-2015 15:08:46.362 DEBUG TestBtoB:280 - someFloats[2]: 3.000000
+03-07-2015 15:08:46.362 DEBUG TestBtoB:280 - someFloats[3]: 4.000000
+03-07-2015 15:08:46.362 DEBUG TestBtoB:280 - someFloats[4]: 5.000000
+03-07-2015 15:08:46.362 DEBUG TestBtoB:286 - someLongs[0]: -1
+03-07-2015 15:08:46.362 DEBUG TestBtoB:286 - someLongs[1]: -2
+03-07-2015 15:08:46.362 DEBUG TestBtoB:286 - someLongs[2]: -3
+03-07-2015 15:08:46.362 DEBUG TestBtoB:286 - someLongs[3]: -4
+03-07-2015 15:08:46.362 DEBUG TestBtoB:286 - someLongs[4]: -5
+03-07-2015 15:08:46.362 DEBUG TestBtoB:298 - someStrings[0]: 1string
+03-07-2015 15:08:46.362 DEBUG Chat:577 - Entered packStr()
+03-07-2015 15:08:46.362 DEBUG InitializeChat:48 - Entered initialize()
+03-07-2015 15:08:46.362 DEBUG InitializeChat:50 - element.getName(): Chat
+03-07-2015 15:08:46.362 DEBUG InitializeChat:296 - Creating new KeyValuePair: user
+03-07-2015 15:08:46.362 DEBUG InitializeChat:322 - Creating new KeyValuePair: msg
+03-07-2015 15:08:46.362 DEBUG InitializeChat:348 - Creating new KeyValuePair: dud1
+03-07-2015 15:08:46.362 DEBUG InitializeChat:374 - Creating new KeyValuePair: dud2
+03-07-2015 15:08:46.362 DEBUG InitializeChat:400 - Creating new KeyValuePair: dud3
+03-07-2015 15:08:46.362 DEBUG InitializeChat:426 - Creating new KeyValuePair: dud4
+03-07-2015 15:08:46.362 DEBUG InitializeChat:452 - Creating new KeyValuePair: dud5
+03-07-2015 15:08:46.362 DEBUG InitializeChat:478 - Creating new KeyValuePair: dud6
+03-07-2015 15:08:46.362 DEBUG InitializeChat:504 - Creating new KeyValuePair: dud7
+03-07-2015 15:08:46.362 DEBUG InitializeChat:531 - Creating new KeyValuePair: timestamp
+03-07-2015 15:08:46.362 DEBUG InitializeChat:559 - Creating new KeyValuePair: someBooleans[0]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:559 - Creating new KeyValuePair: someBooleans[1]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:559 - Creating new KeyValuePair: someBooleans[2]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:559 - Creating new KeyValuePair: someBooleans[3]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:559 - Creating new KeyValuePair: someBooleans[4]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:589 - Creating new KeyValuePair: someBytes[0]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:589 - Creating new KeyValuePair: someBytes[1]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:589 - Creating new KeyValuePair: someBytes[2]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:589 - Creating new KeyValuePair: someBytes[3]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:589 - Creating new KeyValuePair: someBytes[4]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:619 - Creating new KeyValuePair: someChars[0]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:619 - Creating new KeyValuePair: someChars[1]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:619 - Creating new KeyValuePair: someChars[2]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:619 - Creating new KeyValuePair: someChars[3]
+03-07-2015 15:08:46.362 DEBUG InitializeChat:619 - Creating new KeyValuePair: someChars[4]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:649 - Creating new KeyValuePair: someInts[0]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:649 - Creating new KeyValuePair: someInts[1]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:649 - Creating new KeyValuePair: someInts[2]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:649 - Creating new KeyValuePair: someInts[3]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:649 - Creating new KeyValuePair: someInts[4]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:679 - Creating new KeyValuePair: someFloats[0]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:679 - Creating new KeyValuePair: someFloats[1]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:679 - Creating new KeyValuePair: someFloats[2]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:679 - Creating new KeyValuePair: someFloats[3]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:679 - Creating new KeyValuePair: someFloats[4]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:709 - Creating new KeyValuePair: someLongs[0]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:709 - Creating new KeyValuePair: someLongs[1]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:709 - Creating new KeyValuePair: someLongs[2]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:709 - Creating new KeyValuePair: someLongs[3]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:709 - Creating new KeyValuePair: someLongs[4]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:739 - Creating new KeyValuePair: someShorts[0]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:739 - Creating new KeyValuePair: someShorts[1]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:739 - Creating new KeyValuePair: someShorts[2]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:739 - Creating new KeyValuePair: someShorts[3]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:739 - Creating new KeyValuePair: someShorts[4]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:769 - Creating new KeyValuePair: someStrings[0]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:769 - Creating new KeyValuePair: someStrings[1]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:769 - Creating new KeyValuePair: someStrings[2]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:769 - Creating new KeyValuePair: someStrings[3]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:769 - Creating new KeyValuePair: someStrings[4]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:799 - Creating new KeyValuePair: someDoubles[0]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:799 - Creating new KeyValuePair: someDoubles[1]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:799 - Creating new KeyValuePair: someDoubles[2]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:799 - Creating new KeyValuePair: someDoubles[3]
+03-07-2015 15:08:46.378 DEBUG InitializeChat:799 - Creating new KeyValuePair: someDoubles[4]
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:40 - Entered initialize()
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:44 - Creating new element: variables[0]
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:93 - Creating new KeyValuePair: name
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:119 - Creating new KeyValuePair: datatype
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:145 - Creating new KeyValuePair: multi
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:79 - Leaving initialize()
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:40 - Entered initialize()
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:44 - Creating new element: variables[1]
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:93 - Creating new KeyValuePair: name
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:119 - Creating new KeyValuePair: datatype
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:145 - Creating new KeyValuePair: multi
+03-07-2015 15:08:46.378 DEBUG InitializeVariable:79 - Leaving initialize()
+03-07-2015 15:08:46.378 DEBUG InitializeChat:847 - Creating new Key/Value pair: action
+03-07-2015 15:08:46.378 DEBUG InitializeChat:282 - Leaving initialize()
+03-07-2015 15:08:46.378 DEBUG Chat:599 - msg: {chat user:<STRING_BEGIN>the user<STRING_END> msg:<STRING_BEGIN>test message<STRING_END> dud1:255 dud2:123.45 dud3:6.789 dud4:x dud5:true dud6:-1 dud7:<DATE_TIME_BEGIN>2015-03-07T15:08:46.316-0500<DATE_TIME_END> timestamp:305419896 someBooleans[0]:true someBooleans[1]:false someBooleans[2]:true someBooleans[3]:false someBooleans[4]:true someBytes[0]:10 someBytes[1]:11 someBytes[2]:12 someBytes[3]:13 someBytes[4]:14 someChars[0]:a someChars[1]:b someChars[2]:c someChars[3]:d someChars[4]:e someInts[0]:1 someInts[1]:2 someInts[2]:3 someInts[3]:4 someInts[4]:5 someFloats[0]:1.0 someFloats[1]:2.0 someFloats[2]:3.0 someFloats[3]:4.0 someFloats[4]:5.0 someLongs[0]:-1 someLongs[1]:-2 someLongs[2]:-3 someLongs[3]:-4 someLongs[4]:-5 someShorts[0]:1 someShorts[1]:2 someShorts[2]:3 someShorts[3]:4 someShorts[4]:5 someStrings[0]:<STRING_BEGIN>1string<STRING_END> someStrings[1]:<STRING_BEGIN>2string<STRING_END> someStrings[2]:<STRING_BEGIN>3string<STRING_END> someStrings[3]:<STRING_BEGIN>4string<STRING_END> someStrings[4]:<STRING_BEGIN>5string<STRING_END> someDoubles[0]:-6.0 someDoubles[1]:7.0 someDoubles[2]:-8.0 someDoubles[3]:9.0 someDoubles[4]:-10.0 {variables[0] name:<STRING_BEGIN>My Name1<STRING_END> datatype:<STRING_BEGIN>Some datatype1<STRING_END> multi:true} {variables[1] name:<STRING_BEGIN>My Name2<STRING_END> datatype:<STRING_BEGIN>Some datatype2<STRING_END> multi:true} action:<ENUM_BEGIN>DELETE<ENUM_END>}
+03-07-2015 15:08:46.378 DEBUG Chat:602 - Leaving packStr()
+03-07-2015 15:08:46.378 DEBUG TestBtoB:202 - str: 1426
+03-07-2015 15:08:46.394 DEBUG TestBtoB:203 - ba - 553 bytes.
+000: 00 08 00 00  00 FF 42 F6  E6 66 40 1B  27 EF 9D B2  | ......B..f@.'... |
+010: 2D 0E 00 78  80 FF 00 00  01 4B F5 DA  B5 EC 00 00  | -..x.....K...... |
+020: 00 00 12 34  56 78 00 00  00 01 00 00  00 00 00 00  | ...4Vx.......... |
+030: 00 08 00 00  00 F6 00 00  00 01 00 00  00 0C 00 00  | ................ |
+040: 00 FE 00 00  00 0A 00 00  00 05 00 00  01 0A 00 00  | ................ |
+050: 00 0B 00 00  00 05 00 00  01 0F 00 00  00 0C 00 00  | ................ |
+060: 00 05 00 00  01 14 00 00  00 0D 00 00  00 05 00 00  | ................ |
+070: 01 1E 00 00  00 0E 00 00  00 05 00 00  01 32 00 00  | .............2.. |
+080: 00 0F 00 00  00 05 00 00  01 46 00 00  00 10 00 00  | .........F...... |
+090: 00 05 00 00  01 6E 00 00  00 11 00 00  00 07 00 00  | .....n.......... |
+0A0: 01 78 00 00  00 11 00 00  00 07 00 00  01 7F 00 00  | .x............. |
+0B0: 00 11 00 00  00 07 00 00  01 86 00 00  00 11 00 00  | ................ |
+0C0: 00 07 00 00  01 8D 00 00  00 11 00 00  00 07 00 00  | ................ |
+0D0: 01 94 00 00  00 12 00 00  00 05 00 00  01 9B 00 00  | ................ |
+0E0: 00 13 00 00  00 2F 00 00  01 C3 00 00  00 13 00 00  | ...../.......... |
+0F0: 00 2F 00 00  01 F2 74 68  65 20 75 73  65 72 74 65  | ./....the userte |
+100: 73 74 20 6D  65 73 73 61  67 65 80 00  80 00 80 0A  | st message...... |
+110: 0B 0C 0D 0E  00 61 00 62  00 63 00 64  00 65 00 00  | .....a.b.c.d.e.. |
+120: 00 01 00 00  00 02 00 00  00 03 00 00  00 04 00 00  | ................ |
+130: 00 05 3F 80  00 00 40 00  00 00 40 40  00 00 40 80  | ..?...@...@@..@. |
+140: 00 00 40 A0  00 00 FF FF  FF FF FF FF  FF FF FF FF  | ..@............. |
+150: FF FF FF FF  FF FE FF FF  FF FF FF FF  FF FD FF FF  | ................ |
+160: FF FF FF FF  FF FC FF FF  FF FF FF FF  FF FB 00 01  | ................ |
+170: 00 02 00 03  00 04 00 05  31 73 74 72  69 6E 67 32  | ........1string2 |
+180: 73 74 72 69  6E 67 33 73  74 72 69 6E  67 34 73 74  | string3string4st |
+190: 72 69 6E 67  35 73 74 72  69 6E 67 C0  18 00 00 00  | ring5string..... |
+1A0: 00 00 00 40  1C 00 00 00  00 00 00 C0  20 00 00 00  | ...@........ ... |
+1B0: 00 00 00 40  22 00 00 00  00 00 00 C0  24 00 00 00  | ...@".......$... |
+1C0: 00 00 00 80  00 00 00 00  00 00 00 08  00 00 00 19  | ................ |
+1D0: 00 00 00 01  00 00 00 0E  00 00 00 21  4D 79 20 4E  | ...........!My N |
+1E0: 61 6D 65 31  53 6F 6D 65  20 64 61 74  61 74 79 70  | ame1Some datatyp |
+1F0: 65 31 80 00  00 00 00 00  00 00 08 00  00 00 19 00  | e1.............. |
+200: 00 00 01 00  00 00 0E 00  00 00 21 4D  79 20 4E 61  | ..........!My Na |
+210: 6D 65 32 53  6F 6D 65 20  64 61 74 61  74 79 70 65  | me2Some datatype |
+220: 32 00 00 00  00 DF D9 1C  83                        | 2........        |
+
+03-07-2015 15:08:46.394 DEBUG Chat:456 - Entered unpack()
+03-07-2015 15:08:46.394 DEBUG Variable:208 - Entered unpack()
+03-07-2015 15:08:46.394 DEBUG Variable:247 - Leaving unpack()
+03-07-2015 15:08:46.394 DEBUG Variable:208 - Entered unpack()
+03-07-2015 15:08:46.394 DEBUG Variable:247 - Leaving unpack()
+03-07-2015 15:08:46.394 DEBUG Chat:562 - Leaving unpack()
+03-07-2015 15:08:46.394 DEBUG TestBtoB:217 - user: the user
+03-07-2015 15:08:46.394 DEBUG TestBtoB:218 - msg: test message
+03-07-2015 15:08:46.394 DEBUG TestBtoB:219 - timestamp: 305419896
+03-07-2015 15:08:46.394 DEBUG TestBtoB:220 - dud1: 255
+03-07-2015 15:08:46.394 DEBUG TestBtoB:221 - dud2: 123.45
+03-07-2015 15:08:46.394 DEBUG TestBtoB:222 - dud3: 6.789
+03-07-2015 15:08:46.394 DEBUG TestBtoB:223 - dud4: x
+03-07-2015 15:08:46.394 DEBUG TestBtoB:224 - dud5: true
+03-07-2015 15:08:46.394 DEBUG TestBtoB:225 - dud6: -1
+03-07-2015 15:08:46.394 DEBUG TestBtoB:226 - dud7: 1425758926316
+03-07-2015 15:08:46.394 DEBUG TestBtoB:227 - action: DELETE
+03-07-2015 15:08:46.394 DEBUG TestBtoB:230 - variable.datatype: Some datatype1
+03-07-2015 15:08:46.394 DEBUG TestBtoB:231 - variable.multi: false
+03-07-2015 15:08:46.394 DEBUG TestBtoB:232 - variable.name: My Name1
+03-07-2015 15:08:46.394 DEBUG TestBtoB:230 - variable.datatype: Some datatype2
+03-07-2015 15:08:46.394 DEBUG TestBtoB:231 - variable.multi: false
+03-07-2015 15:08:46.394 DEBUG TestBtoB:232 - variable.name: My Name2
+03-07-2015 15:08:46.394 DEBUG TestBtoB:235 - valid checksum: true
+03-07-2015 15:08:46.394 DEBUG TestBtoB:239 - chat2.getSomeBooleans().size: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:242 - someBooleans[0]: true
+03-07-2015 15:08:46.394 DEBUG TestBtoB:242 - someBooleans[1]: false
+03-07-2015 15:08:46.394 DEBUG TestBtoB:242 - someBooleans[2]: true
+03-07-2015 15:08:46.394 DEBUG TestBtoB:242 - someBooleans[3]: false
+03-07-2015 15:08:46.394 DEBUG TestBtoB:242 - someBooleans[4]: true
+03-07-2015 15:08:46.394 DEBUG TestBtoB:247 - chat2.getSomeBytes().size: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:250 - someBytes[0]: 10
+03-07-2015 15:08:46.394 DEBUG TestBtoB:250 - someBytes[1]: 11
+03-07-2015 15:08:46.394 DEBUG TestBtoB:250 - someBytes[2]: 12
+03-07-2015 15:08:46.394 DEBUG TestBtoB:250 - someBytes[3]: 13
+03-07-2015 15:08:46.394 DEBUG TestBtoB:250 - someBytes[4]: 14
+03-07-2015 15:08:46.394 DEBUG TestBtoB:256 - someChars[0]: a
+03-07-2015 15:08:46.394 DEBUG TestBtoB:256 - someChars[1]: b
+03-07-2015 15:08:46.394 DEBUG TestBtoB:256 - someChars[2]: c
+03-07-2015 15:08:46.394 DEBUG TestBtoB:256 - someChars[3]: d
+03-07-2015 15:08:46.394 DEBUG TestBtoB:256 - someChars[4]: e
+03-07-2015 15:08:46.394 DEBUG TestBtoB:261 - chat2.getSomeInts().size: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:264 - someInts[0]: 1
+03-07-2015 15:08:46.394 DEBUG TestBtoB:264 - someInts[1]: 2
+03-07-2015 15:08:46.394 DEBUG TestBtoB:264 - someInts[2]: 3
+03-07-2015 15:08:46.394 DEBUG TestBtoB:264 - someInts[3]: 4
+03-07-2015 15:08:46.394 DEBUG TestBtoB:264 - someInts[4]: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:269 - chat2.getSomeShorts().size: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:272 - someShorts[0]: 1
+03-07-2015 15:08:46.394 DEBUG TestBtoB:272 - someShorts[1]: 2
+03-07-2015 15:08:46.394 DEBUG TestBtoB:272 - someShorts[2]: 3
+03-07-2015 15:08:46.394 DEBUG TestBtoB:272 - someShorts[3]: 4
+03-07-2015 15:08:46.394 DEBUG TestBtoB:272 - someShorts[4]: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:277 - chat2.getSomeFloats().size: 5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:280 - someFloats[0]: 1.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:280 - someFloats[1]: 2.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:280 - someFloats[2]: 3.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:280 - someFloats[3]: 4.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:280 - someFloats[4]: 5.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:286 - someLongs[0]: -1
+03-07-2015 15:08:46.394 DEBUG TestBtoB:286 - someLongs[1]: -2
+03-07-2015 15:08:46.394 DEBUG TestBtoB:286 - someLongs[2]: -3
+03-07-2015 15:08:46.394 DEBUG TestBtoB:286 - someLongs[3]: -4
+03-07-2015 15:08:46.394 DEBUG TestBtoB:286 - someLongs[4]: -5
+03-07-2015 15:08:46.394 DEBUG TestBtoB:292 - someDoubles[0]: -6.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:292 - someDoubles[1]: 7.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:292 - someDoubles[2]: -8.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:292 - someDoubles[3]: 9.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:292 - someDoubles[4]: -10.000000
+03-07-2015 15:08:46.394 DEBUG TestBtoB:298 - someStrings[0]: 1string
+03-07-2015 15:08:46.394 DEBUG TestBtoB:298 - someStrings[1]: 2string
+03-07-2015 15:08:46.394 DEBUG TestBtoB:298 - someStrings[2]: 3string
+03-07-2015 15:08:46.394 DEBUG TestBtoB:298 - someStrings[3]: 4string
+03-07-2015 15:08:46.394 DEBUG TestBtoB:298 - someStrings[4]: 5string

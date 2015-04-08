@@ -1,0 +1,15 @@
+com.viacron.utils.bbb.ByteByByte/.launch
+com.viacron.utils.bbb.ByteByByte/bin
+com.viacron.utils.bbb.ByteByByte/.project
+com.viacron.utils.bbb.ByteByByte/.classpath
+com.viacron.utils.bbb.ByteByByte/src-gen
+com.viacron.utils.bbb.ByteByByte/xtend-gen
+com.viacron.utils.bbb.ByteByByte.sdk/.project
+com.viacron.utils.bbb.ByteByByte.tests/bin
+com.viacron.utils.bbb.ByteByByte.tests/.project
+com.viacron.utils.bbb.ByteByByte.tests/.classpath
+com.viacron.utils.bbb.ByteByByte.ui/src-gen
+com.viacron.utils.bbb.ByteByByte.ui/.project
+com.viacron.utils.bbb.ByteByByte.ui/.classpath
+.metadata
+

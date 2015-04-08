@@ -1,0 +1,518 @@
+03-30-2015 20:34:50.158 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:34:50.158 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:34:50.158 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:34:50.174 DEBUG Details:164 - Entered pack()
+03-30-2015 20:34:50.174 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:34:50.174 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:34:50.174 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:34:50.174 DEBUG Details:203 - inserting severity at offset 8
+03-30-2015 20:34:50.174 DEBUG Details:236 - inserting app at offset 33
+03-30-2015 20:34:50.174 DEBUG Details:243 - inserting module at offset 38
+03-30-2015 20:34:50.174 DEBUG Details:254 - inserting the directory at offset 9
+03-30-2015 20:34:50.174 DEBUG Details:258 - index[0]: 
+03-30-2015 20:34:50.174 DEBUG Details:259 -   ID:     0
+03-30-2015 20:34:50.174 DEBUG Details:260 -   length: 5
+03-30-2015 20:34:50.174 DEBUG Details:261 -   offset: 33
+03-30-2015 20:34:50.174 DEBUG Details:258 - index[1]: 
+03-30-2015 20:34:50.174 DEBUG Details:259 -   ID:     1
+03-30-2015 20:34:50.174 DEBUG Details:260 -   length: 8
+03-30-2015 20:34:50.174 DEBUG Details:261 -   offset: 38
+03-30-2015 20:34:50.174 DEBUG Details:271 - Leaving pack()
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:34:50.174 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:34:50.190 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:34:50.190 DEBUG Details:284 - Entered unpack()
+03-30-2015 20:34:50.190 DEBUG Details:325 - Leaving unpack()
+03-30-2015 20:34:50.190 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 20:37:07.189 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:37:07.205 DEBUG Details:164 - Entered pack()
+03-30-2015 20:37:07.205 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:37:07.205 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:37:07.205 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:37:07.205 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:37:07.205 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:37:07.205 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:37:07.205 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:37:07.205 DEBUG Details:259 - index[0]: 
+03-30-2015 20:37:07.205 DEBUG Details:260 -   ID:     0
+03-30-2015 20:37:07.205 DEBUG Details:261 -   length: 5
+03-30-2015 20:37:07.205 DEBUG Details:262 -   offset: 33
+03-30-2015 20:37:07.205 DEBUG Details:259 - index[1]: 
+03-30-2015 20:37:07.205 DEBUG Details:260 -   ID:     1
+03-30-2015 20:37:07.205 DEBUG Details:261 -   length: 8
+03-30-2015 20:37:07.205 DEBUG Details:262 -   offset: 38
+03-30-2015 20:37:07.205 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:37:07.205 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:37:07.220 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:37:07.220 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:37:07.220 DEBUG Details:326 - Leaving unpack()
+03-30-2015 20:37:07.220 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 20:38:26.422 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:38:26.422 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:38:26.422 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:38:26.437 DEBUG Details:164 - Entered pack()
+03-30-2015 20:38:26.437 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:38:26.437 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:38:26.437 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:38:26.437 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:38:26.437 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:38:26.437 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:38:26.437 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:38:26.437 DEBUG Details:259 - index[0]: 
+03-30-2015 20:38:26.437 DEBUG Details:260 -   ID:     0
+03-30-2015 20:38:26.437 DEBUG Details:261 -   length: 5
+03-30-2015 20:38:26.437 DEBUG Details:262 -   offset: 33
+03-30-2015 20:38:26.437 DEBUG Details:259 - index[1]: 
+03-30-2015 20:38:26.437 DEBUG Details:260 -   ID:     1
+03-30-2015 20:38:26.437 DEBUG Details:261 -   length: 8
+03-30-2015 20:38:26.437 DEBUG Details:262 -   offset: 38
+03-30-2015 20:38:26.437 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:38:26.437 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:38:26.453 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:38:26.453 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:38:26.453 DEBUG Details:326 - Leaving unpack()
+03-30-2015 20:38:26.453 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 20:45:48.872 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:45:48.888 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:45:48.888 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:45:48.888 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:45:48.888 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:45:48.888 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:45:48.888 DEBUG Details:164 - Entered pack()
+03-30-2015 20:45:48.888 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:45:48.888 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:45:48.888 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:45:48.888 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:45:48.888 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:45:48.888 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:45:48.888 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:45:48.888 DEBUG Details:259 - index[0]: 
+03-30-2015 20:45:48.888 DEBUG Details:260 -   ID:     0
+03-30-2015 20:45:48.888 DEBUG Details:261 -   length: 5
+03-30-2015 20:45:48.903 DEBUG Details:262 -   offset: 33
+03-30-2015 20:45:48.903 DEBUG Details:259 - index[1]: 
+03-30-2015 20:45:48.903 DEBUG Details:260 -   ID:     1
+03-30-2015 20:45:48.903 DEBUG Details:261 -   length: 8
+03-30-2015 20:45:48.903 DEBUG Details:262 -   offset: 38
+03-30-2015 20:45:48.903 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:45:48.903 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:45:48.903 DEBUG Details:326 - Leaving unpack()
+03-30-2015 20:45:48.903 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 20:47:13.923 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:47:13.939 DEBUG Details:164 - Entered pack()
+03-30-2015 20:47:13.939 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:47:13.939 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:47:13.939 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:47:13.939 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:47:13.939 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:47:13.939 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:47:13.939 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:47:13.939 DEBUG Details:259 - index[0]: 
+03-30-2015 20:47:13.939 DEBUG Details:260 -   ID:     0
+03-30-2015 20:47:13.939 DEBUG Details:261 -   length: 5
+03-30-2015 20:47:13.939 DEBUG Details:262 -   offset: 33
+03-30-2015 20:47:13.939 DEBUG Details:259 - index[1]: 
+03-30-2015 20:47:13.939 DEBUG Details:260 -   ID:     1
+03-30-2015 20:47:13.939 DEBUG Details:261 -   length: 8
+03-30-2015 20:47:13.939 DEBUG Details:262 -   offset: 38
+03-30-2015 20:47:13.939 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:47:13.939 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:47:13.954 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:47:13.954 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:47:13.954 DEBUG Details:328 - Leaving unpack()
+03-30-2015 20:47:13.954 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 20:49:06.228 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:49:06.243 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:49:06.243 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:49:06.243 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:49:06.243 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:49:06.243 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:49:06.243 DEBUG Details:164 - Entered pack()
+03-30-2015 20:49:06.243 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:49:06.243 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:49:06.243 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:49:06.243 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:49:06.243 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:49:06.243 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:49:06.243 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:49:06.243 DEBUG Details:259 - index[0]: 
+03-30-2015 20:49:06.243 DEBUG Details:260 -   ID:     0
+03-30-2015 20:49:06.259 DEBUG Details:261 -   length: 5
+03-30-2015 20:49:06.259 DEBUG Details:262 -   offset: 33
+03-30-2015 20:49:06.259 DEBUG Details:259 - index[1]: 
+03-30-2015 20:49:06.259 DEBUG Details:260 -   ID:     1
+03-30-2015 20:49:06.259 DEBUG Details:261 -   length: 8
+03-30-2015 20:49:06.259 DEBUG Details:262 -   offset: 38
+03-30-2015 20:49:06.259 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:49:06.259 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:49:06.259 DEBUG Details:328 - Leaving unpack()
+03-30-2015 20:49:06.259 DEBUG LogMonMessage:309 - Leaving unpack()
+03-30-2015 20:52:15.144 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:52:15.144 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:52:15.144 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:52:15.160 DEBUG Details:164 - Entered pack()
+03-30-2015 20:52:15.160 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:52:15.160 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:52:15.160 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:52:15.160 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:52:15.160 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:52:15.160 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:52:15.160 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:52:15.160 DEBUG Details:259 - index[0]: 
+03-30-2015 20:52:15.160 DEBUG Details:260 -   ID:     0
+03-30-2015 20:52:15.160 DEBUG Details:261 -   length: 5
+03-30-2015 20:52:15.160 DEBUG Details:262 -   offset: 33
+03-30-2015 20:52:15.160 DEBUG Details:259 - index[1]: 
+03-30-2015 20:52:15.160 DEBUG Details:260 -   ID:     1
+03-30-2015 20:52:15.160 DEBUG Details:261 -   length: 8
+03-30-2015 20:52:15.160 DEBUG Details:262 -   offset: 38
+03-30-2015 20:52:15.160 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:52:15.160 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:52:15.175 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:52:15.175 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:52:15.175 DEBUG Details:328 - Leaving unpack()
+03-30-2015 20:52:15.175 DEBUG LogMonMessage:310 - Leaving unpack()
+03-30-2015 20:53:02.537 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 20:53:02.553 DEBUG Details:164 - Entered pack()
+03-30-2015 20:53:02.553 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 20:53:02.553 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 20:53:02.553 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 20:53:02.553 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 20:53:02.553 DEBUG Details:237 - inserting app at offset 33
+03-30-2015 20:53:02.553 DEBUG Details:244 - inserting module at offset 38
+03-30-2015 20:53:02.553 DEBUG Details:255 - inserting the directory at offset 9
+03-30-2015 20:53:02.553 DEBUG Details:259 - index[0]: 
+03-30-2015 20:53:02.553 DEBUG Details:260 -   ID:     0
+03-30-2015 20:53:02.553 DEBUG Details:261 -   length: 5
+03-30-2015 20:53:02.553 DEBUG Details:262 -   offset: 33
+03-30-2015 20:53:02.553 DEBUG Details:259 - index[1]: 
+03-30-2015 20:53:02.553 DEBUG Details:260 -   ID:     1
+03-30-2015 20:53:02.553 DEBUG Details:261 -   length: 8
+03-30-2015 20:53:02.553 DEBUG Details:262 -   offset: 38
+03-30-2015 20:53:02.553 DEBUG Details:272 - Leaving pack()
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 20:53:02.553 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 20:53:02.568 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 20:53:02.568 DEBUG Details:285 - Entered unpack()
+03-30-2015 20:53:02.568 DEBUG Details:328 - Leaving unpack()
+03-30-2015 20:53:02.568 DEBUG LogMonMessage:310 - Leaving unpack()
+03-30-2015 21:01:40.261 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 21:01:40.276 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 21:01:40.276 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 21:01:40.276 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 21:01:40.276 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 21:01:40.276 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 21:01:40.292 DEBUG Details:164 - Entered pack()
+03-30-2015 21:01:40.292 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 21:01:40.292 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 21:01:40.292 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 21:01:40.292 DEBUG Details:204 - inserting severity at offset 8
+03-30-2015 21:01:40.292 DEBUG Details:238 - inserting app at offset 33
+03-30-2015 21:01:40.292 DEBUG Details:245 - inserting module at offset 38
+03-30-2015 21:01:40.292 DEBUG Details:256 - inserting the directory at offset 9
+03-30-2015 21:01:40.292 DEBUG Details:260 - index[0]: 
+03-30-2015 21:01:40.292 DEBUG Details:261 -   ID:     0
+03-30-2015 21:01:40.292 DEBUG Details:262 -   length: 5
+03-30-2015 21:01:40.292 DEBUG Details:263 -   offset: 33
+03-30-2015 21:01:40.292 DEBUG Details:260 - index[1]: 
+03-30-2015 21:01:40.292 DEBUG Details:261 -   ID:     1
+03-30-2015 21:01:40.292 DEBUG Details:262 -   length: 8
+03-30-2015 21:01:40.292 DEBUG Details:263 -   offset: 38
+03-30-2015 21:01:40.292 DEBUG Details:273 - Leaving pack()
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 21:01:40.292 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 21:01:40.308 DEBUG Details:286 - Entered unpack()
+03-30-2015 21:01:40.308 DEBUG Details:329 - Leaving unpack()
+03-30-2015 21:01:40.308 DEBUG LogMonMessage:310 - Leaving unpack()
+03-30-2015 21:06:08.168 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 21:06:08.184 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 21:06:08.184 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 21:06:08.184 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 21:06:08.184 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 21:06:08.184 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 21:06:08.199 DEBUG Details:164 - Entered pack()
+03-30-2015 21:06:08.199 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 21:06:08.199 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 21:06:08.199 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 21:06:08.199 DEBUG Details:203 - inserting severity at offset 8
+03-30-2015 21:06:08.199 DEBUG Details:236 - inserting app at offset 33
+03-30-2015 21:06:08.199 DEBUG Details:243 - inserting module at offset 38
+03-30-2015 21:06:08.199 DEBUG Details:254 - inserting the directory at offset 9
+03-30-2015 21:06:08.199 DEBUG Details:258 - index[0]: 
+03-30-2015 21:06:08.199 DEBUG Details:259 -   ID:     0
+03-30-2015 21:06:08.199 DEBUG Details:260 -   length: 5
+03-30-2015 21:06:08.199 DEBUG Details:261 -   offset: 33
+03-30-2015 21:06:08.199 DEBUG Details:258 - index[1]: 
+03-30-2015 21:06:08.199 DEBUG Details:259 -   ID:     1
+03-30-2015 21:06:08.199 DEBUG Details:260 -   length: 8
+03-30-2015 21:06:08.199 DEBUG Details:261 -   offset: 38
+03-30-2015 21:06:08.199 DEBUG Details:271 - Leaving pack()
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 21:06:08.199 DEBUG Details:284 - Entered unpack()
+03-30-2015 21:06:08.199 DEBUG Details:325 - Leaving unpack()
+03-30-2015 21:06:08.199 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 21:07:27.884 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 21:07:27.900 DEBUG Details:164 - Entered pack()
+03-30-2015 21:07:27.900 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 21:07:27.900 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 21:07:27.900 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 21:07:27.900 DEBUG Details:203 - inserting severity at offset 8
+03-30-2015 21:07:27.900 DEBUG Details:236 - inserting app at offset 33
+03-30-2015 21:07:27.900 DEBUG Details:243 - inserting module at offset 38
+03-30-2015 21:07:27.900 DEBUG Details:254 - inserting the directory at offset 9
+03-30-2015 21:07:27.900 DEBUG Details:258 - index[0]: 
+03-30-2015 21:07:27.900 DEBUG Details:259 -   ID:     0
+03-30-2015 21:07:27.900 DEBUG Details:260 -   length: 5
+03-30-2015 21:07:27.900 DEBUG Details:261 -   offset: 33
+03-30-2015 21:07:27.900 DEBUG Details:258 - index[1]: 
+03-30-2015 21:07:27.900 DEBUG Details:259 -   ID:     1
+03-30-2015 21:07:27.900 DEBUG Details:260 -   length: 8
+03-30-2015 21:07:27.900 DEBUG Details:261 -   offset: 38
+03-30-2015 21:07:27.900 DEBUG Details:271 - Leaving pack()
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 21:07:27.900 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 21:07:27.916 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 21:07:27.916 DEBUG Details:284 - Entered unpack()
+03-30-2015 21:07:27.916 DEBUG Details:325 - Leaving unpack()
+03-30-2015 21:07:27.916 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 21:11:16.378 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 21:11:16.394 DEBUG Details:164 - Entered pack()
+03-30-2015 21:11:16.394 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 21:11:16.394 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 21:11:16.394 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 21:11:16.394 DEBUG Details:203 - inserting severity at offset 8
+03-30-2015 21:11:16.394 DEBUG Details:236 - inserting app at offset 33
+03-30-2015 21:11:16.394 DEBUG Details:243 - inserting module at offset 38
+03-30-2015 21:11:16.394 DEBUG Details:254 - inserting the directory at offset 9
+03-30-2015 21:11:16.394 DEBUG Details:258 - index[0]: 
+03-30-2015 21:11:16.394 DEBUG Details:259 -   ID:     0
+03-30-2015 21:11:16.394 DEBUG Details:260 -   length: 5
+03-30-2015 21:11:16.394 DEBUG Details:261 -   offset: 33
+03-30-2015 21:11:16.394 DEBUG Details:258 - index[1]: 
+03-30-2015 21:11:16.394 DEBUG Details:259 -   ID:     1
+03-30-2015 21:11:16.394 DEBUG Details:260 -   length: 8
+03-30-2015 21:11:16.394 DEBUG Details:261 -   offset: 38
+03-30-2015 21:11:16.394 DEBUG Details:271 - Leaving pack()
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 21:11:16.394 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 21:11:16.409 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 21:11:16.409 DEBUG Details:284 - Entered unpack()
+03-30-2015 21:11:16.409 DEBUG Details:325 - Leaving unpack()
+03-30-2015 21:11:16.409 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 21:12:18.681 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 21:12:18.697 DEBUG Details:164 - Entered pack()
+03-30-2015 21:12:18.697 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 21:12:18.697 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 21:12:18.697 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 21:12:18.697 DEBUG Details:203 - inserting severity at offset 8
+03-30-2015 21:12:18.697 DEBUG Details:235 - inserting app at offset 33
+03-30-2015 21:12:18.697 DEBUG Details:242 - inserting module at offset 38
+03-30-2015 21:12:18.697 DEBUG Details:253 - inserting the directory at offset 9
+03-30-2015 21:12:18.697 DEBUG Details:257 - index[0]: 
+03-30-2015 21:12:18.697 DEBUG Details:258 -   ID:     0
+03-30-2015 21:12:18.697 DEBUG Details:259 -   length: 5
+03-30-2015 21:12:18.697 DEBUG Details:260 -   offset: 33
+03-30-2015 21:12:18.697 DEBUG Details:257 - index[1]: 
+03-30-2015 21:12:18.697 DEBUG Details:258 -   ID:     1
+03-30-2015 21:12:18.697 DEBUG Details:259 -   length: 8
+03-30-2015 21:12:18.697 DEBUG Details:260 -   offset: 38
+03-30-2015 21:12:18.697 DEBUG Details:270 - Leaving pack()
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 21:12:18.697 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 21:12:18.713 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 21:12:18.713 DEBUG Details:283 - Entered unpack()
+03-30-2015 21:12:18.713 DEBUG Details:324 - Leaving unpack()
+03-30-2015 21:12:18.713 DEBUG LogMonMessage:308 - Leaving unpack()
+03-30-2015 21:21:54.917 INFO  PackUnpack:76 - Logging initialized
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:156 - Entered pack()
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:159 - byteArraySize: 102
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:171 - inserting timestamp at offset 2
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:213 - inserting msg at offset 34
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:220 - inserting details at offset 48
+03-30-2015 21:21:54.932 DEBUG Details:164 - Entered pack()
+03-30-2015 21:21:54.932 DEBUG Details:167 - byteArraySize: 46
+03-30-2015 21:21:54.932 DEBUG Details:176 - inserting lineNumber at offset 0
+03-30-2015 21:21:54.932 DEBUG Details:190 - inserting facility at offset 4
+03-30-2015 21:21:54.932 DEBUG Details:203 - inserting severity at offset 8
+03-30-2015 21:21:54.932 DEBUG Details:235 - inserting app at offset 33
+03-30-2015 21:21:54.932 DEBUG Details:242 - inserting module at offset 38
+03-30-2015 21:21:54.932 DEBUG Details:253 - inserting the directory at offset 9
+03-30-2015 21:21:54.932 DEBUG Details:257 - index[0]: 
+03-30-2015 21:21:54.932 DEBUG Details:258 -   ID:     0
+03-30-2015 21:21:54.932 DEBUG Details:259 -   length: 5
+03-30-2015 21:21:54.932 DEBUG Details:260 -   offset: 33
+03-30-2015 21:21:54.932 DEBUG Details:257 - index[1]: 
+03-30-2015 21:21:54.932 DEBUG Details:258 -   ID:     1
+03-30-2015 21:21:54.932 DEBUG Details:259 -   length: 8
+03-30-2015 21:21:54.932 DEBUG Details:260 -   offset: 38
+03-30-2015 21:21:54.932 DEBUG Details:270 - Leaving pack()
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:230 - inserting the directory at offset 10
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:234 - index[0]: 
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:235 -   ID:     1
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:236 -   length: 14
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:237 -   offset: 34
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:234 - index[1]: 
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:235 -   ID:     2
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:236 -   length: 46
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:237 -   offset: 48
+03-30-2015 21:21:54.932 DEBUG LogMonMessage:250 - Leaving pack()
+03-30-2015 21:21:54.948 DEBUG LogMonMessage:263 - Entered unpack()
+03-30-2015 21:21:54.948 DEBUG Details:283 - Entered unpack()
+03-30-2015 21:21:54.948 DEBUG Details:324 - Leaving unpack()
+03-30-2015 21:21:54.948 DEBUG LogMonMessage:308 - Leaving unpack()
