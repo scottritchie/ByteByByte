@@ -41,6 +41,13 @@ public class Ungenerate {
 
 	private static String theRootClass;
 
+	//
+	private static final String BBB_INSTANCE_VARIABLES_MARKER = "* See buildInstanceVariables() in JBitByBitGenerator.java.";
+	private static final String SMB_INSTANCE_VARIABLES_MARKER = "* See buildInstanceVariables() in StringMessageBufferGenerator.xtend.";
+
+	private static final String BBB_END_OF_INSTANCE_VARIABLES_MARKER = "* This method gets the";
+	private static final String SMB_END_OF_INSTANCE_VARIABLES_MARKER = "private String element";
+	
 	private static List<Msg> theMessages = new ArrayList<Msg>();
 	private static List<MsgSubType> theSubTypes = new ArrayList<MsgSubType>();
 	private static List<MsgEnum> theEnums = new ArrayList<MsgEnum>();
@@ -51,26 +58,41 @@ public class Ungenerate {
 
 	static SearchState searchState;
 
-	private static boolean isDebug = false;
+	private static boolean isDebug = true;
+	private static String theVersion = "BBB";
+
+	private static String theInstanceVariableMarker;
+	private static String theEndOfInstanceVariablesMarker;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		theRootClass = "C:/Users/Scott/Greenball/workspace/Snippets/src/com/viacron/greenball/messsages/com/viacron/greenball/app/bbb/GreenballMessages.java";
+		theRootClass = "C:/Users/Scott/Documents/Programs/Guictl.08.21.2013/GuictlMessaging/src/com/viacron/guictl/guictl_message/msgs/GuictlMessages.java";
 		int index = 0;
 		for (String arg : args) {
 			if (arg.equals("-root")) {
 				theRootClass = args[index + 1];
 			}
+			else if (arg.equals("-BBB")) {
+				theVersion = "BBB";
+			}
+			else if (arg.equals("-SMB")) {
+				theVersion = "SMB";
+			}
 
 			index++;
 		}
+		
+		theVersion = "SMB";
 
 		if (theRootClass == null) {
 			printUsage();
 			System.exit(0);
 		}
+		
+		initMarkers();
 
 		List<Element> elements = getListOfFiles();
 		if (isDebug)
@@ -92,9 +114,20 @@ public class Ungenerate {
 			System.out.println("Found " + theEnums.size() + " enums.");
 
 		dumpMessages();
-		dumpSubTypes();
-		dumpEnums();
+	//	dumpSubTypes();
+	//	dumpEnums();
 
+	}
+	
+	private static void initMarkers() {
+		if (theVersion.equals("BBB")) {
+			theInstanceVariableMarker = BBB_INSTANCE_VARIABLES_MARKER;
+			theEndOfInstanceVariablesMarker = BBB_END_OF_INSTANCE_VARIABLES_MARKER;
+		}
+		else if(theVersion.equals("SMB")) {			
+			theInstanceVariableMarker = SMB_INSTANCE_VARIABLES_MARKER;
+			theEndOfInstanceVariablesMarker = SMB_END_OF_INSTANCE_VARIABLES_MARKER;
+		}
 	}
 
 	private static void dumpMessages() {
@@ -243,8 +276,7 @@ public class Ungenerate {
 			List<InstanceVariable> instanceVariables) {
 		boolean isDone = false;
 
-		if (str.trim().equals(
-				"* See buildInstanceVariables() in JBitByBitGenerator.java.")) {
+		if (str.trim().equals(theInstanceVariableMarker)) {
 			if (isDebug)
 				System.out.println("ok1");
 			searchState = SearchState.FOUND_BUILD_INSTANCE_VARIABLES;
@@ -274,7 +306,7 @@ public class Ungenerate {
 				searchState = SearchState.FOUND_BUILD_INSTANCE_VARIABLES;
 			} else if (str.trim().length() > 22
 					&& str.trim().substring(0, 22)
-							.equals("* This method gets the")) {
+							.equals(theEndOfInstanceVariablesMarker)) {
 				if (isDebug)
 					System.out.println("ok6");
 				isDone = true;
@@ -287,7 +319,12 @@ public class Ungenerate {
 			if (isDebug)
 				System.out.println("ok3");
 			String[] tokens = str.trim().split(" ");
+			
+			if (isDebug)
+				System.out.println("# of tokens: " + tokens.length);
+			
 
+			// BBB
 			if (tokens.length == 3) {
 				int tokenLen = tokens[2].length();
 				String variableType = fixCase(tokens[1]);
@@ -305,6 +342,28 @@ public class Ungenerate {
 					System.out.println("variableType: " + variableType);
 				if (isDebug)
 					System.out.println("variableName: " + variableName);
+				
+				InstanceVariable msgAttr = new InstanceVariable(variableType,
+						variableName);
+				instanceVariables.add(msgAttr);
+			} else if (tokens.length == 5) {
+				// SMB
+				String variableType = fixCase(tokens[1]);
+
+				String variableName = tokens[2];
+
+				if (variableType.startsWith("List<")) {
+					int len = tokens[1].length();
+					variableType = fixCase(tokens[1].substring(5, len - 1));
+
+					variableType = "list of " + variableType;
+				}
+
+				if (isDebug)
+					System.out.println("variableType: " + variableType);
+				if (isDebug)
+					System.out.println("variableName: " + variableName);
+				
 				InstanceVariable msgAttr = new InstanceVariable(variableType,
 						variableName);
 				instanceVariables.add(msgAttr);

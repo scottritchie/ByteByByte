@@ -66,7 +66,7 @@ public class JByteByByteGenerator implements IGenerator {
 	private Resource theResource;
 	private String grammarName = "";
 	private String rootClass = "";
-	private boolean isFirst = true;
+	// private boolean isFirst = true;
 	private String attributeInitString = "";
 	private String instantiationString = "";
 	private String classSearchString = "";
@@ -145,7 +145,6 @@ public class JByteByByteGenerator implements IGenerator {
 
 		// Generate a class file for each Message
 		for (Message msg : theMessageList) {
-			isFirst = true;
 			className = msg.getName();
 
 			dumpMessage(msg);
@@ -157,8 +156,6 @@ public class JByteByByteGenerator implements IGenerator {
 
 		// Generate a class file for each SubType
 		for (SubType subType : theSubTypeList) {
-			isFirst = true;
-
 			if (isDebug)
 				System.out.println("subtype: " + subType.getName());
 			printAttributes(subType.getAttributes());
@@ -192,8 +189,6 @@ public class JByteByByteGenerator implements IGenerator {
 
 		// Generate an initialization class file for each SubType
 		for (SubType subType : theSubTypeList) {
-			isFirst = true;
-
 			if (isDebug)
 				System.out.println("subtype: " + subType.getName());
 			printAttributes(subType.getAttributes());
@@ -210,8 +205,6 @@ public class JByteByByteGenerator implements IGenerator {
 
 		// Generate an instantiation class file for each SubType
 		for (SubType subType : theSubTypeList) {
-			isFirst = true;
-
 			if (isDebug)
 				System.out.println("subtype: " + subType.getName());
 			printAttributes(subType.getAttributes());
@@ -520,18 +513,12 @@ public class JByteByByteGenerator implements IGenerator {
 	private String buildObjectInstanceSearcher(Resource resource,
 			String packMethod) {
 		classSearchString = "";
-		isFirst = true;
+		boolean isFirst = true;
 		for (Message e : theMessageList) {
-			if (isFirst == true) {
-				classSearchString = classSearchString.concat(getPad()
-						+ "if (obj instanceof " + e.getName() + ") {"
-						+ LINE_SEPARATOR);
-				isFirst = false;
-			} else {
-				classSearchString = classSearchString.concat(getPad()
-						+ "else if (obj instanceof " + e.getName() + ") {"
-						+ LINE_SEPARATOR);
-			}
+			classSearchString = classSearchString.concat(getPad()
+					+ (isFirst ? "" : "else ") + "if (obj instanceof "
+					+ e.getName() + ") {" + LINE_SEPARATOR);
+			isFirst = false;
 
 			classSearchString = classSearchString.concat(getPad()
 					+ "   log4j.debug(\"Found it\");" + LINE_SEPARATOR);
@@ -558,20 +545,15 @@ public class JByteByByteGenerator implements IGenerator {
 
 	private String buildIdSearcher(Resource resource, String enumName) {
 		String toString = "";
-		isFirst = true;
+		boolean isFirst = true;
+
 		for (Message e : theMessageList) {
-			if (isFirst == true) {
-				toString = toString.concat(getPad() + "if (" + enumName
-						+ ".getId() == " + rootClass + "Enum."
-						+ handleCamelCase(e.getName()) + ".getId()) {"
-						+ LINE_SEPARATOR);
-				isFirst = false;
-			} else {
-				toString = toString.concat(getPad() + "else if (" + enumName
-						+ ".getId() == " + rootClass + "Enum."
-						+ handleCamelCase(e.getName()) + ".getId()) {"
-						+ LINE_SEPARATOR);
-			}
+			toString = toString.concat(getPad() + (isFirst ? "" : "else ")
+					+ "if (" + enumName + ".getId() == " + rootClass + "Enum."
+					+ handleCamelCase(e.getName()) + ".getId()) {"
+					+ LINE_SEPARATOR);
+			isFirst = false;
+
 			theLevel++;
 			toString = toString.concat(getPad() + "log4j.debug(\"Found it\");"
 					+ LINE_SEPARATOR);
@@ -590,18 +572,13 @@ public class JByteByByteGenerator implements IGenerator {
 
 	private String buildClassSearcher(Resource resource) {
 		classSearchString = "";
-		isFirst = true;
+		boolean isFirst = true;
+
 		for (Message e : theMessageList) {
-			if (isFirst == true) {
-				classSearchString = classSearchString.concat(getPad()
-						+ "if (className.equals(\"" + e.getName() + "\")) {"
-						+ LINE_SEPARATOR);
-				isFirst = false;
-			} else {
-				classSearchString = classSearchString.concat(getPad()
-						+ "else if (className.equals(\"" + e.getName()
-						+ "\")) {" + LINE_SEPARATOR);
-			}
+			classSearchString = classSearchString.concat(getPad()
+					+ (isFirst ? "" : "else ") + "if (className.equals(\""
+					+ e.getName() + "\")) {" + LINE_SEPARATOR);
+			isFirst = false;
 
 			classSearchString = classSearchString.concat(getPad()
 					+ "   log4j.debug(\"Found it\");" + LINE_SEPARATOR);
@@ -621,20 +598,23 @@ public class JByteByByteGenerator implements IGenerator {
 	private String buildParameterList(int pad,
 			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs) {
 		String parameterList = "";
-		isFirst = true;
+		boolean isFirst = true;
+
+		parameterList = parameterList.concat("// Entered buildParameterList()");
+
 		for (AbstractAttribute attribute : attributes) {
+			parameterList = parameterList.concat((isFirst ? "" : ",") + LINE_SEPARATOR
+					 + getPad() + "        ");
+			isFirst = false;
+
+			int i = 0;
+			while (i < pad) {
+				parameterList = parameterList.concat(" ");
+				i++;
+			}
+
 			if (attribute instanceof Attribute) {
 				Attribute attr = (Attribute) attribute;
-				if (isFirst == false) {
-					parameterList = parameterList.concat("," + LINE_SEPARATOR
-							+ getPad() + "        ");
-					int i = 0;
-					while (i < pad) {
-						parameterList = parameterList.concat(" ");
-						i++;
-					}
-				}
-				isFirst = false;
 
 				if (attr.getListOf() != null) {
 					if (attr.getAttributeType() == AttributeType.CHAR) {
@@ -648,6 +628,7 @@ public class JByteByByteGenerator implements IGenerator {
 					}
 				} else {
 					String attributeType = attr.getAttributeType().getLiteral();
+					
 					if (attributeType.equals(AttributeType.CHAR.toString())) {
 						attributeType = "Character";
 					} else if (attributeType.equals(AttributeType.CALENDAR
@@ -663,11 +644,6 @@ public class JByteByByteGenerator implements IGenerator {
 			} else if (attribute instanceof SubTypeRef) {
 				SubTypeRef subTypeRef = (SubTypeRef) attribute;
 
-				if (isFirst == false) {
-					parameterList = parameterList.concat(", ");
-				}
-				isFirst = false;
-
 				if (subTypeRef.getListOf() != null) {
 					parameterList = parameterList.concat("List<"
 							+ subTypeRef.getSubType().getName())
@@ -682,21 +658,27 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 
 		for (PEnumRef penumRef : penumRefs) {
-			if (isFirst == false) {
-				parameterList = parameterList.concat(", ");
-			}
+			parameterList = parameterList.concat((isFirst ? "" : ",")
+					+ LINE_SEPARATOR + getPad() + "        ");
 			isFirst = false;
+
+			int i = 0;
+			while (i < pad) {
+				parameterList = parameterList.concat(" ");
+				i++;
+			}
+			
 			parameterList = parameterList.concat(penumRef.getPenum().getName())
 					+ " " + penumRef.getName();
 		}
 
+		parameterList = parameterList.concat(") { // Leaving buildParameterList()");
 		return parameterList;
 	}
 
 	private String buildToStringMethod(EList<AbstractAttribute> attributes,
 			EList<PEnumRef> penumRefs) {
 		String toString = "";
-		isFirst = true;
 
 		for (AbstractAttribute attribute : attributes) {
 			if (attribute instanceof Attribute) {
@@ -1205,15 +1187,14 @@ public class JByteByByteGenerator implements IGenerator {
 			EList<PEnumRef> penumRefs) {
 		final String METHOD = "buildValidationMethod()";
 
-		instantiationString = instantiationString.concat("// Entered " + METHOD
+		instantiationString = instantiationString.concat(getPad() + "// Entered " + METHOD
 				+ LINE_SEPARATOR);
 		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : attributes) {
 			if (abstractAttribute.getOptional() == null) {
-				if (isFirst == false) {
-					instantiationString = instantiationString
-							.concat(LINE_SEPARATOR);
-				}
+				instantiationString = instantiationString.concat(isFirst ? ""
+						: LINE_SEPARATOR);
+
 				instantiationString = instantiationString.concat(getPad()
 						+ "if (!this.is"
 						+ toFirstUpper(abstractAttribute.getName())
@@ -1276,6 +1257,9 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 			}
 		}
+		
+		instantiationString = instantiationString.concat(getPad() + "// Leaving " + METHOD
+				+ LINE_SEPARATOR);
 
 		return instantiationString;
 	}
@@ -1295,7 +1279,6 @@ public class JByteByByteGenerator implements IGenerator {
 			prefix = oldPrefix;
 
 			theLevel--;
-			isFirst = true;
 		}
 	}
 
@@ -1315,7 +1298,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ "throw new MissingAttributeException(getErrorMsg());"
 				+ LINE_SEPARATOR);
 		theLevel--;
-		
+
 		return exceptionString;
 	}
 
@@ -1327,20 +1310,14 @@ public class JByteByByteGenerator implements IGenerator {
 			theLevel = 0;
 		}
 
-		isFirst = true;
+		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : attributes) {
 			if (abstractAttribute.getOptional() == null) {
-				if (isFirst == true) {
-					flagString = flagString.concat(getPad() + "if (is" + prefix
-							+ toFirstUpper(abstractAttribute.getName())
-							+ "Updated == false) {" + LINE_SEPARATOR);
-					isFirst = false;
-				} else {
-					flagString = flagString.concat(getPad() + "else if (is"
-							+ prefix
-							+ toFirstUpper(abstractAttribute.getName())
-							+ "Updated == false) {" + LINE_SEPARATOR);
-				}
+				flagString = flagString.concat(getPad()
+						+ (isFirst ? "" : "else ") + "if (is" + prefix
+						+ toFirstUpper(abstractAttribute.getName())
+						+ "Updated == false) {" + LINE_SEPARATOR);
+				isFirst = false;
 
 				flagString = flagString.concat(getPad() + "return \"" + prefix
 						+ toFirstUpper(abstractAttribute.getName())
@@ -1784,155 +1761,92 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 
 		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "for (" + className + "Enum "
-				+ toFirstLower(className) + "Enum : " + className
-				+ "Enum.values()) {" + LINE_SEPARATOR);
-		theLevel++;
-		toString = toString.concat(getPad() + "if (" + toFirstLower(className)
-				+ "Enum.isDirectoryEntry == true) {" + LINE_SEPARATOR);
-		theLevel++;
-		toString = toString.concat(getPad() + "int id = "
-				+ toFirstLower(className) + "Enum.getId();" + LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "int length = "
-				+ toFirstLower(className) + "Enum.getLength();"
-				+ LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "theDirectory[index].setId(id);"
-				+ LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ "theDirectory[index].setLength(length);" + LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ "theDirectory[index].setOffset(offset);" + LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
 
-		// Insert the data
-		toString = toString.concat(getPad() + "// Insert the data"
-				+ LINE_SEPARATOR);
-		boolean isFirst = true;
+		if (attributes.size() > 0) {
+			toString = toString.concat(getPad() + "for (" + className + "Enum "
+					+ toFirstLower(className) + "Enum : " + className
+					+ "Enum.values()) {" + LINE_SEPARATOR);
+			theLevel++;
+			toString = toString.concat(getPad() + "if ("
+					+ toFirstLower(className)
+					+ "Enum.isDirectoryEntry == true) {" + LINE_SEPARATOR);
+			theLevel++;
+			toString = toString.concat(getPad() + "int id = "
+					+ toFirstLower(className) + "Enum.getId();"
+					+ LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "int length = "
+					+ toFirstLower(className) + "Enum.getLength();"
+					+ LINE_SEPARATOR);
+			toString = toString.concat(LINE_SEPARATOR);
+			toString = toString.concat(getPad()
+					+ "theDirectory[index].setId(id);" + LINE_SEPARATOR);
+			toString = toString
+					.concat(getPad() + "theDirectory[index].setLength(length);"
+							+ LINE_SEPARATOR);
+			toString = toString
+					.concat(getPad() + "theDirectory[index].setOffset(offset);"
+							+ LINE_SEPARATOR);
+			toString = toString.concat(LINE_SEPARATOR);
 
-		for (AbstractAttribute abstractAttribute : attributes) {
-			if (abstractAttribute instanceof Attribute) {
-				if (isDirectoryEntry(abstractAttribute) == true) {
-					Attribute attribute = (Attribute) abstractAttribute;
-					boolean isList = attribute.getListOf() != null;
-					String attributeType = attribute.getAttributeType()
-							.getLiteral();
+			// Insert the data
+			toString = toString.concat(getPad() + "// Insert the data"
+					+ LINE_SEPARATOR);
+			boolean isFirst = true;
 
-					if (attributeType.equals(AttributeType.CALENDAR.toString())) {
-						attributeType = toFirstUpper(attributeType);
-					} else if (attributeType.equals(AttributeType.STRING
-							.toString())) {
-						attributeType = toFirstUpper(attributeType);
-					} else if (attributeType.equals(AttributeType.INT
-							.toString())) {
-						attributeType = AttributeType.INT.getName()
-								.toLowerCase();
-					}
+			for (AbstractAttribute abstractAttribute : attributes) {
+				if (abstractAttribute instanceof Attribute) {
+					if (isDirectoryEntry(abstractAttribute) == true) {
+						Attribute attribute = (Attribute) abstractAttribute;
+						boolean isList = attribute.getListOf() != null;
+						String attributeType = attribute.getAttributeType()
+								.getLiteral();
 
-					String typeName = toFirstUpper(attribute.getAttributeType() == AttributeType.CHAR ? "Character"
-							: attribute.getAttributeType().getLiteral());
-
-					if (isFirst == true) {
-						toString = toString.concat(getPad() + "if (id == ");
-						isFirst = false;
-					} else {
-						toString = toString
-								.concat(getPad() + "else if (id == ");
-					}
-
-					toString = toString.concat(className + "Enum."
-							+ handleCamelCase(attribute.getName())
-							+ ".getId()) {" + LINE_SEPARATOR);
-					theLevel++;
-
-					toString = toString
-							.concat(getPad()
-									+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
-									+ attribute.getName() + "\", offset));"
-									+ LINE_SEPARATOR);
-
-					if (isList == false) {
-						if (attribute.getAttributeType() == AttributeType.STRING) {
-							// Check for null string
-							toString = toString.concat(getPad() + "if (get"
-									+ toFirstUpper(attribute.getName())
-									+ "() != null) {" + LINE_SEPARATOR);
-							theLevel++;
+						if (attributeType.equals(AttributeType.CALENDAR
+								.toString())) {
+							attributeType = toFirstUpper(attributeType);
+						} else if (attributeType.equals(AttributeType.STRING
+								.toString())) {
+							attributeType = toFirstUpper(attributeType);
+						} else if (attributeType.equals(AttributeType.INT
+								.toString())) {
+							attributeType = AttributeType.INT.getName()
+									.toLowerCase();
 						}
-						toString = toString.concat(getPad() + "bb = "
-								+ rootClass + "Utility.insert" + typeName
-								+ "(bb, offset, get"
-								+ toFirstUpper(attribute.getName()) + "());"
-								+ LINE_SEPARATOR);
+
+						String typeName = toFirstUpper(attribute
+								.getAttributeType() == AttributeType.CHAR ? "Character"
+								: attribute.getAttributeType().getLiteral());
+
+						if (isFirst == true) {
+							toString = toString.concat(getPad() + "if (id == ");
+							isFirst = false;
+						} else {
+							toString = toString.concat(getPad()
+									+ "else if (id == ");
+						}
+
+						toString = toString.concat(className + "Enum."
+								+ handleCamelCase(attribute.getName())
+								+ ".getId()) {" + LINE_SEPARATOR);
+						theLevel++;
+
 						toString = toString
 								.concat(getPad()
-										+ "offset += length * "
-										+ (attribute.getAttributeType() == AttributeType.STRING == true ? "1"
-												: getPrimitiveSize(attribute
-														.getAttributeType()
-														.getLiteral())) + ";"
+										+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+										+ attribute.getName() + "\", offset));"
 										+ LINE_SEPARATOR);
 
-						if (attribute.getAttributeType() == AttributeType.STRING) {
-							theLevel--;
-							toString = toString.concat(getPad() + "}"
-									+ LINE_SEPARATOR);
-						}
-						theLevel--;
-						toString = toString.concat(getPad() + "}"
-								+ LINE_SEPARATOR);
-					} else {
-						/*
-						 * Handle lists of strings
-						 */
-						if (attribute.getAttributeType() == AttributeType.STRING) {
-							toString = toString.concat(getPad()
-									+ "for (String s : get"
-									+ toFirstUpper(attribute.getName())
-									+ "()) {" + LINE_SEPARATOR);
-							theLevel++;
+						if (isList == false) {
+							if (attribute.getAttributeType() == AttributeType.STRING) {
+								// Check for null string
+								toString = toString.concat(getPad() + "if (get"
+										+ toFirstUpper(attribute.getName())
+										+ "() != null) {" + LINE_SEPARATOR);
+								theLevel++;
+							}
 							toString = toString.concat(getPad() + "bb = "
 									+ rootClass + "Utility.insert" + typeName
-									+ "(bb, offset, s);" + LINE_SEPARATOR);
-							toString = toString.concat(getPad()
-									+ "int strLen = s.getBytes(Charset"
-									+ LINE_SEPARATOR);
-							toString = toString.concat(getPad(2)
-									+ ".forName(\"UTF-8\")).length;"
-									+ LINE_SEPARATOR);
-							toString = toString.concat(LINE_SEPARATOR);
-							toString = toString.concat(getPad()
-									+ "theDirectory[index].setId(id);"
-									+ LINE_SEPARATOR);
-							toString = toString.concat(getPad()
-									+ "theDirectory[index].setLength(strLen);"
-									+ LINE_SEPARATOR);
-							toString = toString.concat(getPad()
-									+ "theDirectory[index].setOffset(offset);"
-									+ LINE_SEPARATOR);
-							toString = toString.concat(LINE_SEPARATOR);
-							toString = toString.concat(getPad()
-									+ "offset += strLen;" + LINE_SEPARATOR);
-							toString = toString.concat(getPad() + "index++;"
-									+ LINE_SEPARATOR);
-							theLevel--;
-							toString = toString.concat(getPad() + "}"
-									+ LINE_SEPARATOR);
-							toString = toString.concat(getPad() + "index--;"
-									+ LINE_SEPARATOR);
-							theLevel--;
-							toString = toString.concat(getPad() + "}"
-									+ LINE_SEPARATOR);
-						} else {
-							toString = toString
-									.concat(getPad()
-											+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
-											+ attribute.getName()
-											+ "\", offset));" + LINE_SEPARATOR);
-
-							toString = toString.concat(getPad() + "bb = "
-									+ rootClass + "Utility.insert" + typeName
-									+ "s(bb, offset, get"
+									+ "(bb, offset, get"
 									+ toFirstUpper(attribute.getName())
 									+ "());" + LINE_SEPARATOR);
 							toString = toString
@@ -1943,132 +1857,220 @@ public class JByteByByteGenerator implements IGenerator {
 															.getAttributeType()
 															.getLiteral()))
 											+ ";" + LINE_SEPARATOR);
+
+							if (attribute.getAttributeType() == AttributeType.STRING) {
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+							}
 							theLevel--;
 							toString = toString.concat(getPad() + "}"
 									+ LINE_SEPARATOR);
+						} else {
+							/*
+							 * Handle lists of strings
+							 */
+							if (attribute.getAttributeType() == AttributeType.STRING) {
+								toString = toString.concat(getPad()
+										+ "for (String s : get"
+										+ toFirstUpper(attribute.getName())
+										+ "()) {" + LINE_SEPARATOR);
+								theLevel++;
+								toString = toString.concat(getPad() + "bb = "
+										+ rootClass + "Utility.insert"
+										+ typeName + "(bb, offset, s);"
+										+ LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ "int strLen = s.getBytes(Charset"
+										+ LINE_SEPARATOR);
+								toString = toString.concat(getPad(2)
+										+ ".forName(\"UTF-8\")).length;"
+										+ LINE_SEPARATOR);
+								toString = toString.concat(LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ "theDirectory[index].setId(id);"
+										+ LINE_SEPARATOR);
+								toString = toString
+										.concat(getPad()
+												+ "theDirectory[index].setLength(strLen);"
+												+ LINE_SEPARATOR);
+								toString = toString
+										.concat(getPad()
+												+ "theDirectory[index].setOffset(offset);"
+												+ LINE_SEPARATOR);
+								toString = toString.concat(LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ "offset += strLen;" + LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ "index++;" + LINE_SEPARATOR);
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ "index--;" + LINE_SEPARATOR);
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+							} else {
+								toString = toString
+										.concat(getPad()
+												+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+												+ attribute.getName()
+												+ "\", offset));"
+												+ LINE_SEPARATOR);
+
+								toString = toString.concat(getPad() + "bb = "
+										+ rootClass + "Utility.insert"
+										+ typeName + "s(bb, offset, get"
+										+ toFirstUpper(attribute.getName())
+										+ "());" + LINE_SEPARATOR);
+								toString = toString
+										.concat(getPad()
+												+ "offset += length * "
+												+ (attribute.getAttributeType() == AttributeType.STRING == true ? "1"
+														: getPrimitiveSize(attribute
+																.getAttributeType()
+																.getLiteral()))
+												+ ";" + LINE_SEPARATOR);
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+							}
 						}
 					}
-				}
-			} else if (abstractAttribute instanceof SubTypeRef) {
-				SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
-				boolean isList = subTypeRef.getListOf() != null;
+				} else if (abstractAttribute instanceof SubTypeRef) {
+					SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
+					boolean isList = subTypeRef.getListOf() != null;
 
-				if (isFirst == true) {
-					toString = toString.concat(getPad() + "if (id == ");
-					isFirst = false;
-				} else {
-					toString = toString.concat(getPad() + "else if (id == ");
-				}
+					if (isFirst == true) {
+						toString = toString.concat(getPad() + "if (id == ");
+						isFirst = false;
+					} else {
+						toString = toString
+								.concat(getPad() + "else if (id == ");
+					}
 
-				toString = toString.concat(className + "Enum."
-						+ handleCamelCase(subTypeRef.getName()) + ".getId()) {"
-						+ LINE_SEPARATOR);
-				theLevel++;
+					toString = toString.concat(className + "Enum."
+							+ handleCamelCase(subTypeRef.getName())
+							+ ".getId()) {" + LINE_SEPARATOR);
+					theLevel++;
 
-				toString = toString
-						.concat(getPad()
-								+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
-								+ subTypeRef.getName() + "\", offset));"
+					toString = toString
+							.concat(getPad()
+									+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+									+ subTypeRef.getName() + "\", offset));"
+									+ LINE_SEPARATOR);
+
+					if (isList == false) {
+						toString = toString.concat(getPad()
+								+ "byte[] bytes = this.get"
+								+ toFirstUpper(subTypeRef.getName())
+								+ "().pack();" + LINE_SEPARATOR);
+
+						toString = toString.concat(getPad() + "bb = "
+								+ rootClass + "Utility.insertBytes"
+								+ "(bb, offset, bytes);" + LINE_SEPARATOR);
+						toString = toString.concat(getPad()
+								+ "offset += bytes.length;" + LINE_SEPARATOR);
+					} else {
+						toString = toString.concat(getPad()
+								+ "for ("
+								+ subTypeRef.getSubType().getName()
+								+ " "
+								+ toFirstLower(subTypeRef.getSubType()
+										.getName()
+										+ " : this."
+										+ subTypeRef.getName()
+										+ ") {"
+										+ LINE_SEPARATOR));
+						theLevel++;
+						toString = toString.concat(getPad()
+								+ "byte[] bytes = "
+								+ toFirstLower(subTypeRef.getSubType()
+										.getName()) + ".pack();"
 								+ LINE_SEPARATOR);
 
-				if (isList == false) {
-					toString = toString.concat(getPad()
-							+ "byte[] bytes = this.get"
-							+ toFirstUpper(subTypeRef.getName()) + "().pack();"
-							+ LINE_SEPARATOR);
+						toString = toString.concat(getPad() + "bb = "
+								+ rootClass + "Utility.insertBytes"
+								+ "(bb, offset, bytes);" + LINE_SEPARATOR);
 
-					toString = toString.concat(getPad() + "bb = " + rootClass
-							+ "Utility.insertBytes" + "(bb, offset, bytes);"
-							+ LINE_SEPARATOR);
-					toString = toString.concat(getPad()
-							+ "offset += bytes.length;" + LINE_SEPARATOR);
-				} else {
-					toString = toString.concat(getPad()
-							+ "for ("
-							+ subTypeRef.getSubType().getName()
-							+ " "
-							+ toFirstLower(subTypeRef.getSubType().getName()
-									+ " : this." + subTypeRef.getName() + ") {"
-									+ LINE_SEPARATOR));
-					theLevel++;
-					toString = toString.concat(getPad() + "byte[] bytes = "
-							+ toFirstLower(subTypeRef.getSubType().getName())
-							+ ".pack();" + LINE_SEPARATOR);
+						toString = toString.concat(LINE_SEPARATOR);
+						toString = toString.concat(getPad()
+								+ "theDirectory[index].setId(id);"
+								+ LINE_SEPARATOR);
+						toString = toString
+								.concat(getPad()
+										+ "theDirectory[index].setLength(bytes.length);"
+										+ LINE_SEPARATOR);
+						toString = toString.concat(getPad()
+								+ "theDirectory[index].setOffset(offset);"
+								+ LINE_SEPARATOR);
+						toString = toString.concat(LINE_SEPARATOR);
 
-					toString = toString.concat(getPad() + "bb = " + rootClass
-							+ "Utility.insertBytes" + "(bb, offset, bytes);"
-							+ LINE_SEPARATOR);
-
-					toString = toString.concat(LINE_SEPARATOR);
-					toString = toString
-							.concat(getPad() + "theDirectory[index].setId(id);"
-									+ LINE_SEPARATOR);
-					toString = toString.concat(getPad()
-							+ "theDirectory[index].setLength(bytes.length);"
-							+ LINE_SEPARATOR);
-					toString = toString.concat(getPad()
-							+ "theDirectory[index].setOffset(offset);"
-							+ LINE_SEPARATOR);
-					toString = toString.concat(LINE_SEPARATOR);
-
-					toString = toString.concat(getPad()
-							+ "offset += bytes.length;" + LINE_SEPARATOR);
-					toString = toString.concat(getPad() + "index++;"
-							+ LINE_SEPARATOR);
+						toString = toString.concat(getPad()
+								+ "offset += bytes.length;" + LINE_SEPARATOR);
+						toString = toString.concat(getPad() + "index++;"
+								+ LINE_SEPARATOR);
+						theLevel--;
+						toString = toString.concat(getPad() + "}"
+								+ LINE_SEPARATOR);
+					}
 					theLevel--;
 					toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 				}
-				theLevel--;
-				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 			}
-		}
 
-		for (PEnumRef penumRef : penumRefs) {
-			if (penumRef.getOptional() != null) {
-				if (isFirst == true) {
-					toString = toString.concat(getPad() + "if (id == ");
-					isFirst = false;
-				} else {
-					toString = toString.concat(getPad() + "else if (id == ");
+			for (PEnumRef penumRef : penumRefs) {
+				if (penumRef.getOptional() != null) {
+					if (isFirst == true) {
+						toString = toString.concat(getPad() + "if (id == ");
+						isFirst = false;
+					} else {
+						toString = toString
+								.concat(getPad() + "else if (id == ");
+					}
+
+					toString = toString.concat(className + "Enum."
+							+ handleCamelCase(penumRef.getName())
+							+ ".getId()) {" + LINE_SEPARATOR);
+					theLevel++;
+
+					toString = toString
+							.concat(getPad()
+									+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+									+ penumRef.getName() + "\", offset));"
+									+ LINE_SEPARATOR);
+					int sizeInBytes = log8(penumRef.getPenum().getElements()
+							.size());
+					int sizeInBits = log2(penumRef.getPenum().getElements()
+							.size());
+
+					toString = toString.concat(getPad() + "bb = " + rootClass
+							+ "Utility.insertBitfield(bb, offset * 8, "
+							+ sizeInBits + ", get"
+							+ toFirstUpper(penumRef.getName())
+							+ "().ordinal());" + LINE_SEPARATOR);
+
+					toString = toString.concat(getPad() + "// bb = "
+							+ rootClass
+							+ "Utility.insertInteger(bb, offset, get"
+							+ toFirstUpper(penumRef.getName())
+							+ "().ordinal());" + LINE_SEPARATOR);
+
+					toString = toString.concat(getPad() + "offset += "
+							+ sizeInBytes + ";" + LINE_SEPARATOR);
+					theLevel--;
+					toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 				}
-
-				toString = toString.concat(className + "Enum."
-						+ handleCamelCase(penumRef.getName()) + ".getId()) {"
-						+ LINE_SEPARATOR);
-				theLevel++;
-
-				toString = toString
-						.concat(getPad()
-								+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
-								+ penumRef.getName() + "\", offset));"
-								+ LINE_SEPARATOR);
-				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
-				int sizeInBits = log2(penumRef.getPenum().getElements().size());
-
-				toString = toString.concat(getPad() + "bb = " + rootClass
-						+ "Utility.insertBitfield(bb, offset * 8, "
-						+ sizeInBits + ", get"
-						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
-						+ LINE_SEPARATOR);
-
-				toString = toString.concat(getPad() + "// bb = " + rootClass
-						+ "Utility.insertInteger(bb, offset, get"
-						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
-						+ LINE_SEPARATOR);
-
-				toString = toString.concat(getPad() + "offset += "
-						+ sizeInBytes + ";" + LINE_SEPARATOR);
-				theLevel--;
-				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 			}
-		}
 
-		toString = toString.concat(getPad() + "index++;" + LINE_SEPARATOR);
-		theLevel--;
-		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
-		theLevel--;
-		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "index++;" + LINE_SEPARATOR);
+			theLevel--;
+			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+			theLevel--;
+			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+			toString = toString.concat(LINE_SEPARATOR);
+		}
 
 		// Insert the directory
 		toString = toString.concat(getPad() + "// Insert the directory"
@@ -2833,6 +2835,7 @@ public class JByteByByteGenerator implements IGenerator {
 			AbstractAttribute abstractAttribute, EList<PEnumRef> penumRefs,
 			EList<AbstractAttribute> attributes, String elementAttributeName,
 			String subElementName) {
+
 		if (abstractAttribute.getListOf() != null) {
 			if (abstractAttribute instanceof Attribute) {
 				Attribute attr = (Attribute) abstractAttribute;
@@ -2862,14 +2865,18 @@ public class JByteByByteGenerator implements IGenerator {
 			instantiationString = instantiationString.concat(getPad()
 					+ "log4j.debug(\"searching for key: \" + kvp.getKey());"
 					+ LINE_SEPARATOR);
-			isFirst = true;
+
+			boolean isFirst = true;
 			for (PEnumRef penumRef : penumRefs) {
-				instantiatePEnumRef(className, penumRef);
+				instantiatePEnumRef(className, penumRef, isFirst);
+				isFirst = false;
 			}
 
+			isFirst = true;
 			for (AbstractAttribute aa : attributes) {
 				if (aa.getListOf() == null) {
-					instantiateKeyValuePair(className, aa);
+					instantiateKeyValuePair(className, aa, isFirst);
+					isFirst = false;
 				}
 			}
 
@@ -2896,13 +2903,14 @@ public class JByteByByteGenerator implements IGenerator {
 					+ "      log4j.debug(\"searching for element: \" + "
 					+ subElementName + ".getName());" + LINE_SEPARATOR);
 
-			isFirst = true;
 			theLevel++;
 
+			boolean isFirst = true;
 			for (AbstractAttribute aa : attributes) {
 				if (abstractAttribute instanceof SubTypeRef) {
 					instantiateAttribute(className, subElementName,
-							aa.getName(), aa, abstractAttribute);
+							aa.getName(), aa, abstractAttribute, isFirst);
+					isFirst = false;
 				}
 			}
 
@@ -2950,6 +2958,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ elementAttributeName + ".getAbstractAttributes()) {"
 				+ LINE_SEPARATOR);
 
+		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : attributes) {
 
 			instantiationString = instantiationString.concat(getPad()
@@ -2985,10 +2994,11 @@ public class JByteByByteGenerator implements IGenerator {
 					instantiationString = instantiationString.concat(getPad()
 							+ "   log4j.debug(\"searching for element: \" + "
 							+ subElementName + ".getName());" + LINE_SEPARATOR);
-					isFirst = true;
 					theLevel++;
 					instantiateAttribute(className, subElementName,
-							abstractAttributeName, parent, abstractAttribute);
+							abstractAttributeName, parent, abstractAttribute,
+							isFirst);
+					isFirst = false;
 					theLevel--;
 					instantiationString = instantiationString.concat(getPad()
 							+ "}" + LINE_SEPARATOR);
@@ -3035,8 +3045,10 @@ public class JByteByByteGenerator implements IGenerator {
 							+ subElementName + ".getName());" + LINE_SEPARATOR);
 					isFirst = true;
 					theLevel++;
+
 					instantiateAttribute(className, subElementName,
-							abstractAttributeName, parent, abstractAttribute);
+							abstractAttributeName, parent, abstractAttribute,
+							isFirst);
 					theLevel--;
 					instantiationString = instantiationString.concat(getPad()
 							+ "}" + LINE_SEPARATOR);
@@ -3062,7 +3074,7 @@ public class JByteByByteGenerator implements IGenerator {
 	}
 
 	private String instantiateMsgAttributeList(String className,
-			Attribute attribute) {
+			Attribute attribute, boolean isFirst) {
 		final String METHOD = "instantiateMsgAttributeList()";
 		instantiationString = instantiationString.concat(getPad()
 				+ "// Entered " + METHOD + LINE_SEPARATOR);
@@ -3072,6 +3084,7 @@ public class JByteByByteGenerator implements IGenerator {
 
 		String attrNameFirstUpper = toFirstUpper(attribute.getName());
 		instantiationString = instantiationString.concat(getPad()
+				+ (isFirst == true ? "" : "else ")
 				+ "if (kvp.getKey().startsWith(\"" + attribute.getName()
 				+ "[\")) {" + LINE_SEPARATOR);
 
@@ -3085,9 +3098,11 @@ public class JByteByByteGenerator implements IGenerator {
 		instantiationString = instantiationString.concat(getPad() + "if("
 				+ className + ".get" + attrNameFirstUpper + "() == null) {"
 				+ LINE_SEPARATOR);
+		theLevel++;
 		instantiationString = instantiationString.concat(getPad() + className
 				+ ".set" + attrNameFirstUpper + "(new ArrayList<" + typeName
 				+ ">());" + LINE_SEPARATOR);
+		theLevel--;
 		instantiationString = instantiationString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
 
@@ -3194,20 +3209,31 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 
 		if (isSubTypeRef == true) {
-			isFirst = true;
+			boolean isFirst = true;
 			instantiationString = instantiationString.concat(getPad()
 					+ "for (Element e : abstractAttribute.getElements()) {"
 					+ LINE_SEPARATOR);
+			theLevel++;
+
 			for (AbstractAttribute abstractAttribute : subType.getAttributes()) {
 				if (abstractAttribute instanceof SubTypeRef) {
 					SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
 					if (subTypeRef.getListOf() == null) {
-						instantiateSubTypeRef(subType.getName(), subTypeRef);
+						boolean isRecursive = instantiateSubTypeRef(
+								subType.getName(), subTypeRef, isFirst);
+
+						if (isRecursive == false) {
+							isFirst = false;
+						}
 					} else {
-						instantiateSubTypeRefList(subType.getName(), subTypeRef);
+						instantiateSubTypeRefList(subType.getName(),
+								subTypeRef, isFirst);
+						isFirst = false;
 					}
 				}
 			}
+
+			theLevel--;
 			instantiationString = instantiationString.concat(getPad() + "}"
 					+ LINE_SEPARATOR);
 		}
@@ -3217,107 +3243,64 @@ public class JByteByByteGenerator implements IGenerator {
 		return instantiationString;
 	}
 
-	private void instantiateSubTypeRef(String name, SubTypeRef subTypeRef) {
-		theLevel++;
+	private boolean instantiateSubTypeRef(String name, SubTypeRef subTypeRef,
+			boolean isFirst) {
+
+		boolean isRecursive = false;
 
 		if (subTypeRef.getSubType().getName().equals(name)) {
 			instantiationString = instantiationString.concat(getPad()
 					+ "// Recursive attribute detected..." + LINE_SEPARATOR);
+			isRecursive = true;
 		} else {
-			if (isFirst == true) {
-				instantiationString = instantiationString.concat(getPad()
-						+ "if (e.getName().equals(\"" + subTypeRef.getName()
-						+ "\")) {" + LINE_SEPARATOR);
-				isFirst = false;
-				theLevel++;
-				if (subTypeRef.getOptional() == null) {
-					instantiationString = instantiationString.concat(getPad()
-							+ "this.is" + toFirstUpper(subTypeRef.getName())
-							+ "Updated = true;" + LINE_SEPARATOR);
-				}
-				instantiationString = instantiationString.concat(getPad()
-						+ "log4j.debug(\"found element: "
-						+ subTypeRef.getName() + "\");" + LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ "Instantiate" + subTypeRef.getSubType().getName()
-						+ " instantiate" + subTypeRef.getSubType().getName()
-						+ " =" + LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ "         new Instantiate"
-						+ subTypeRef.getSubType().getName() + "(e);"
-						+ LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ subTypeRef.getSubType().getName() + " "
-						+ toFirstLower(subTypeRef.getSubType().getName())
-						+ " =" + LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ "         instantiate"
-						+ subTypeRef.getSubType().getName() + ".instantiate();"
-						+ LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ toFirstLower(name) + ".set"
-						+ toFirstUpper(subTypeRef.getName()) + "("
-						+ toFirstLower(subTypeRef.getSubType().getName())
-						+ ");" + LINE_SEPARATOR);
-				theLevel--;
-				instantiationString = instantiationString.concat(getPad() + "}"
-						+ LINE_SEPARATOR);
-				theLevel--;
-			} else {
-				instantiationString = instantiationString.concat(getPad()
-						+ "else if (e.getName().equals(\""
-						+ subTypeRef.getName() + "\")) {" + LINE_SEPARATOR);
+			instantiationString = instantiationString.concat(getPad()
+					+ (isFirst ? "" : "else ") + "if (e.getName().equals(\""
+					+ subTypeRef.getName() + "\")) {" + LINE_SEPARATOR);
 
-				theLevel++;
-				if (subTypeRef.getOptional() == null) {
-					instantiationString = instantiationString.concat(getPad()
-							+ "this.is" + toFirstUpper(subTypeRef.getName())
-							+ "Updated = true;" + LINE_SEPARATOR);
-				}
+			theLevel++;
+			if (subTypeRef.getOptional() == null) {
 				instantiationString = instantiationString.concat(getPad()
-						+ "log4j.debug(\"found element: "
-						+ subTypeRef.getName() + "\");" + LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ "Instantiate" + subTypeRef.getSubType().getName()
-						+ " instantiate" + subTypeRef.getSubType().getName()
-						+ " =" + LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ "         new Instantiate"
-						+ subTypeRef.getSubType().getName() + "(e);"
-						+ LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ subTypeRef.getSubType().getName() + " "
-						+ toFirstLower(subTypeRef.getSubType().getName())
-						+ " =" + LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ "         instantiate"
-						+ subTypeRef.getSubType().getName() + ".instantiate();"
-						+ LINE_SEPARATOR);
-				instantiationString = instantiationString.concat(getPad()
-						+ toFirstLower(name) + ".set"
-						+ toFirstUpper(subTypeRef.getName()) + "("
-						+ toFirstLower(subTypeRef.getSubType().getName())
-						+ ");" + LINE_SEPARATOR);
-				theLevel--;
-				instantiationString = instantiationString.concat(getPad() + "}"
-						+ LINE_SEPARATOR);
-				theLevel--;
+						+ "this.is" + toFirstUpper(subTypeRef.getName())
+						+ "Updated = true;" + LINE_SEPARATOR);
 			}
+
+			instantiationString = instantiationString.concat(getPad()
+					+ "log4j.debug(\"found element: " + subTypeRef.getName()
+					+ "\");" + LINE_SEPARATOR);
+			instantiationString = instantiationString.concat(getPad()
+					+ "Instantiate" + subTypeRef.getSubType().getName()
+					+ " instantiate" + subTypeRef.getSubType().getName() + " ="
+					+ LINE_SEPARATOR);
+			instantiationString = instantiationString.concat(getPad()
+					+ "         new Instantiate"
+					+ subTypeRef.getSubType().getName() + "(e);"
+					+ LINE_SEPARATOR);
+			instantiationString = instantiationString.concat(getPad()
+					+ subTypeRef.getSubType().getName() + " "
+					+ toFirstLower(subTypeRef.getSubType().getName()) + " ="
+					+ LINE_SEPARATOR);
+			instantiationString = instantiationString.concat(getPad()
+					+ "         instantiate"
+					+ subTypeRef.getSubType().getName() + ".instantiate();"
+					+ LINE_SEPARATOR);
+			instantiationString = instantiationString.concat(getPad()
+					+ toFirstLower(name) + ".set"
+					+ toFirstUpper(subTypeRef.getName()) + "("
+					+ toFirstLower(subTypeRef.getSubType().getName()) + ");"
+					+ LINE_SEPARATOR);
+			theLevel--;
+			instantiationString = instantiationString.concat(getPad() + "}"
+					+ LINE_SEPARATOR);
 		}
+
+		return isRecursive;
 	}
 
-	private void instantiateSubTypeRefList(String name, SubTypeRef subTypeRef) {
-		theLevel++;
-		if (isFirst == true) {
-			instantiationString = instantiationString.concat(getPad()
-					+ "if (e.getName().startsWith(\"" + subTypeRef.getName()
-					+ "[\")) {" + LINE_SEPARATOR);
-			isFirst = false;
-		} else {
-			instantiationString = instantiationString.concat(getPad()
-					+ "else if (e.getName().startsWith(\""
-					+ subTypeRef.getName() + "[\")) {" + LINE_SEPARATOR);
-		}
+	private void instantiateSubTypeRefList(String name, SubTypeRef subTypeRef,
+			boolean isFirst) {
+		instantiationString = instantiationString.concat(getPad()
+				+ (isFirst ? "" : "else ") + "if (e.getName().startsWith(\""
+				+ subTypeRef.getName() + "[\")) {" + LINE_SEPARATOR);
 
 		theLevel++;
 		if (subTypeRef.getOptional() == null) {
@@ -3325,6 +3308,7 @@ public class JByteByByteGenerator implements IGenerator {
 					+ "this.is" + toFirstUpper(subTypeRef.getName())
 					+ "Updated = true;" + LINE_SEPARATOR);
 		}
+
 		instantiationString = instantiationString.concat(getPad()
 				+ "log4j.debug(\"found element: " + subTypeRef.getName()
 				+ "\");" + LINE_SEPARATOR);
@@ -3332,6 +3316,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ toFirstLower(name) + ".get"
 				+ toFirstUpper(subTypeRef.getName()) + "() == null) {"
 				+ LINE_SEPARATOR);
+		theLevel++;
 		instantiationString = instantiationString.concat(getPad() + "List<"
 				+ subTypeRef.getSubType().getName() + "> "
 				+ subTypeRef.getName() + " = new ArrayList<"
@@ -3340,6 +3325,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ toFirstLower(name) + ".set"
 				+ toFirstUpper(subTypeRef.getName()) + "("
 				+ subTypeRef.getName() + ");" + LINE_SEPARATOR);
+		theLevel--;
 		instantiationString = instantiationString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
 
@@ -3387,10 +3373,10 @@ public class JByteByByteGenerator implements IGenerator {
 					+ toFirstLower(subTypeRef.getSubType().getName()) + ");"
 					+ LINE_SEPARATOR);
 		}
+
 		theLevel--;
 		instantiationString = instantiationString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
-		theLevel--;
 	}
 
 	private String instantiateSubTypeAttributes(SubType subType) {
@@ -3399,22 +3385,26 @@ public class JByteByByteGenerator implements IGenerator {
 		instantiationString = "";
 		instantiationString = instantiationString.concat(getPad()
 				+ "// Entered " + METHOD + LINE_SEPARATOR);
-		isFirst = true;
+		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : subType.getAttributes()) {
 			if (abstractAttribute instanceof Attribute) {
 				Attribute attribute = (Attribute) abstractAttribute;
 				if (attribute.getListOf() == null) {
-					instantiateSubTypeAttribute(subType.getName(), attribute);
+					instantiateSubTypeAttribute(subType.getName(), attribute,
+							isFirst);
+					isFirst = false;
 				} else {
 					instantiateSubTypeAttributeList(subType.getName(),
-							attribute);
+							attribute, isFirst);
+					isFirst = false;
 				}
 			}
 		}
 
 		isFirst = true;
 		for (PEnumRef penumRef : subType.getEnums()) {
-			instantiatePEnumRef(subType.getName(), penumRef);
+			instantiatePEnumRef(subType.getName(), penumRef, isFirst);
+			isFirst = false;
 		}
 
 		instantiationString = instantiationString.concat(getPad()
@@ -3422,17 +3412,13 @@ public class JByteByByteGenerator implements IGenerator {
 		return instantiationString;
 	}
 
-	private void instantiateSubTypeAttribute(String className, Attribute attr) {
-		if (isFirst == true) {
-			instantiationString = instantiationString.concat(getPad()
-					+ "if (kvp.getKey().equals(\"" + attr.getName() + "\")) {"
-					+ LINE_SEPARATOR);
-			isFirst = false;
-		} else {
-			instantiationString = instantiationString.concat(getPad()
-					+ "else if (kvp.getKey().equals(\"" + attr.getName()
-					+ "\")) {" + LINE_SEPARATOR);
-		}
+	private void instantiateSubTypeAttribute(String className, Attribute attr,
+			boolean isFirst) {
+		instantiationString = instantiationString.concat(getPad()
+				+ (isFirst == true ? "" : "else ")
+				+ "if (kvp.getKey().equals(\"" + attr.getName() + "\")) {"
+				+ LINE_SEPARATOR);
+		theLevel++;
 
 		if (attr.getOptional() == null) {
 			instantiationString = instantiationString.concat(getPad() + " "
@@ -3524,12 +3510,13 @@ public class JByteByByteGenerator implements IGenerator {
 					+ LINE_SEPARATOR);
 		}
 
+		theLevel--;
 		instantiationString = instantiationString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
 	}
 
 	private String instantiateSubTypeAttributeList(String name,
-			Attribute attribute) {
+			Attribute attribute, boolean isFirst) {
 		String typeName = toFirstUpper(attribute.getAttributeType()
 				.getLiteral());
 		if (typeName.equals("Char")) {
@@ -3537,17 +3524,10 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 
 		String attrNameFirstUpper = toFirstUpper(attribute.getName());
-
-		if (isFirst == true) {
-			instantiationString = instantiationString.concat(getPad()
-					+ "if (kvp.getKey().startsWith(\"" + attribute.getName()
-					+ "[\")) {" + LINE_SEPARATOR);
-			isFirst = false;
-		} else {
-			instantiationString = instantiationString.concat(getPad()
-					+ "else if (kvp.getKey().startsWith(\""
-					+ attribute.getName() + "[\")) {" + LINE_SEPARATOR);
-		}
+		instantiationString = instantiationString.concat(getPad()
+				+ (isFirst == true ? "" : "else ")
+				+ "if (kvp.getKey().startsWith(\"" + attribute.getName()
+				+ "[\")) {" + LINE_SEPARATOR);
 
 		theLevel++;
 		if (attribute.getOptional() == null) {
@@ -3558,9 +3538,11 @@ public class JByteByByteGenerator implements IGenerator {
 		instantiationString = instantiationString.concat(getPad() + "if("
 				+ toFirstLower(name) + ".get" + attrNameFirstUpper
 				+ "() == null) {" + LINE_SEPARATOR);
+		theLevel++;
 		instantiationString = instantiationString.concat(getPad()
 				+ toFirstLower(name) + ".set" + attrNameFirstUpper
 				+ "(new ArrayList<" + typeName + ">());" + LINE_SEPARATOR);
+		theLevel--;
 		instantiationString = instantiationString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
 
@@ -3608,27 +3590,30 @@ public class JByteByByteGenerator implements IGenerator {
 					+ "Date date;" + LINE_SEPARATOR);
 			instantiationString = instantiationString.concat(getPad() + "try {"
 					+ LINE_SEPARATOR);
+			theLevel++;
 			instantiationString = instantiationString.concat(getPad()
-					+ "   SimpleDateFormat formatter = new SimpleDateFormat(\""
+					+ "SimpleDateFormat formatter = new SimpleDateFormat(\""
 					+ theDateTimeFormat + "\");" + LINE_SEPARATOR);
 			instantiationString = instantiationString.concat(getPad()
-					+ "   date = formatter.parse(kvp.getValue());"
+					+ "date = formatter.parse(kvp.getValue());"
 					+ LINE_SEPARATOR);
+			instantiationString = instantiationString
+					.concat(getPad() + "Calendar cal = Calendar.getInstance();"
+							+ LINE_SEPARATOR);
 			instantiationString = instantiationString.concat(getPad()
-					+ "   Calendar cal = Calendar.getInstance();"
-					+ LINE_SEPARATOR);
-			instantiationString = instantiationString.concat(getPad()
-					+ "   cal.setTime(date);" + LINE_SEPARATOR);
-			;
+					+ "cal.setTime(date);" + LINE_SEPARATOR);
 			instantiationString = instantiationString.concat(getPad()
 					+ toFirstLower(name) + ".get" + attrNameFirstUpper
 					+ ".add(cal);" + LINE_SEPARATOR);
+			theLevel--;
 			instantiationString = instantiationString.concat(getPad()
 					+ "} catch (ParseException ex) {" + LINE_SEPARATOR);
+			theLevel++;
 			instantiationString = instantiationString
 					.concat(getPad()
-							+ "   log4j.error(\"Invalid date format: \" + kvp.getValue());"
+							+ "log4j.error(\"Invalid date format: \" + kvp.getValue());"
 							+ LINE_SEPARATOR);
+			theLevel--;
 			instantiationString = instantiationString.concat(getPad() + "}"
 					+ LINE_SEPARATOR);
 		} else {
@@ -3644,12 +3629,14 @@ public class JByteByByteGenerator implements IGenerator {
 		return instantiationString;
 	}
 
-	private String instantiateMsgAttribute(String className, Attribute attribute) {
+	private String instantiateMsgAttribute(String className,
+			Attribute attribute, boolean isFirst) {
 		final String METHOD = "instantiateMsgAttribute()";
 		instantiationString = instantiationString.concat(getPad()
 				+ "// Entered " + METHOD + LINE_SEPARATOR);
 
 		instantiationString = instantiationString.concat(getPad()
+				+ (isFirst == true ? "" : "else ")
 				+ "if (kvp.getKey().equals(\"" + attribute.getName() + "\")) {"
 				+ LINE_SEPARATOR);
 		instantiationString = instantiationString.concat(getPad()
@@ -3883,19 +3870,14 @@ public class JByteByByteGenerator implements IGenerator {
 	}
 
 	private void instantiateKeyValuePair(String className,
-			AbstractAttribute abstractAttribute) {
+			AbstractAttribute abstractAttribute, boolean isFirst) {
 		if (abstractAttribute instanceof Attribute) {
 			Attribute attr = (Attribute) abstractAttribute;
-			if (isFirst == true) {
-				instantiationString = instantiationString.concat(getPad()
-						+ "   if (kvp.getKey().equals(\"" + attr.getName()
-						+ "\")) {" + LINE_SEPARATOR);
-				isFirst = false;
-			} else {
-				instantiationString = instantiationString.concat(getPad()
-						+ "   else if (kvp.getKey().equals(\"" + attr.getName()
-						+ "\")) {" + LINE_SEPARATOR);
-			}
+			instantiationString = instantiationString.concat(getPad()
+					+ (isFirst ? "" : "else ")
+					+ "else if (kvp.getKey().equals(\"" + attr.getName()
+					+ "\")) {" + LINE_SEPARATOR);
+
 			theLevel++;
 
 			instantiationString = instantiationString.concat(getPad()
@@ -4009,7 +3991,7 @@ public class JByteByByteGenerator implements IGenerator {
 
 	private void instantiateAttribute(String className, String elementName,
 			String attributeName, AbstractAttribute parent,
-			AbstractAttribute abstractAttribute) {
+			AbstractAttribute abstractAttribute, boolean isFirst) {
 		final String METHOD = "instantiateAttribute()";
 		instantiationString = instantiationString.concat(getPad()
 				+ "// Entered " + METHOD + LINE_SEPARATOR);
@@ -4024,32 +4006,16 @@ public class JByteByByteGenerator implements IGenerator {
 		if (abstractAttribute instanceof SubTypeRef) {
 			SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
 
-			if (isFirst == true) {
-				if (subTypeRef.getListOf() != null) {
-					instantiationString = instantiationString
-							.concat(getPad() + "if (" + elementName
-									+ ".getName().startsWith(\""
-									+ subTypeRef.getName() + "[\")) {"
-									+ LINE_SEPARATOR);
-				} else {
-					instantiationString = instantiationString.concat(getPad()
-							+ "if (" + elementName + ".getName().equals(\""
-							+ subTypeRef.getName() + "\")) {" + LINE_SEPARATOR);
-				}
-
-				isFirst = false;
+			if (subTypeRef.getListOf() != null) {
+				instantiationString = instantiationString.concat(getPad()
+						+ (isFirst == true ? "" : "else ") + "if ("
+						+ elementName + ".getName().startsWith(\""
+						+ subTypeRef.getName() + "[\")) {" + LINE_SEPARATOR);
 			} else {
-				if (subTypeRef.getListOf() != null) {
-					instantiationString = instantiationString.concat(getPad()
-							+ "else if (" + elementName
-							+ ".getName().startsWith(\"" + subTypeRef.getName()
-							+ "[\")) {" + LINE_SEPARATOR);
-				} else {
-					instantiationString = instantiationString.concat(getPad()
-							+ "else if (" + elementName
-							+ ".getName().equals(\"" + subTypeRef.getName()
-							+ "\")) {" + LINE_SEPARATOR);
-				}
+				instantiationString = instantiationString.concat(getPad()
+						+ (isFirst == true ? "" : "else ") + "if ("
+						+ elementName + ".getName().equals(\""
+						+ subTypeRef.getName() + "\")) {" + LINE_SEPARATOR);
 			}
 
 			if (subTypeRef.getListOf() != null) {
@@ -4134,29 +4100,27 @@ public class JByteByByteGenerator implements IGenerator {
 				+ "// Leaving " + METHOD + LINE_SEPARATOR);
 	}
 
-	private String instantiatePEnumRef(String className, PEnumRef penumRef) {
+	private String instantiatePEnumRef(String className, PEnumRef penumRef,
+			boolean isFirst) {
 		final String METHOD = "instantiatePEnumRef()";
 		instantiationString = instantiationString.concat(getPad()
 				+ "// Entered " + METHOD + LINE_SEPARATOR);
 
 		String penumRefName = toFirstUpper(penumRef.getName());
 
-		if (isFirst == true) {
-			instantiationString = instantiationString.concat(getPad()
-					+ "if (kvp.getKey().equals(\"" + penumRef.getName()
-					+ "\")) {" + LINE_SEPARATOR);
-			isFirst = false;
-		} else {
-			instantiationString = instantiationString.concat(getPad()
-					+ "else if (kvp.getKey().equals(\"" + penumRef.getName()
-					+ "\")) {" + LINE_SEPARATOR);
-		}
+		instantiationString = instantiationString.concat(getPad()
+				+ (isFirst == true ? "" : "else ")
+				+ "if (kvp.getKey().equals(\"" + penumRef.getName() + "\")) {"
+				+ LINE_SEPARATOR);
+
+		theLevel++;
 
 		if (penumRef.getOptional() == null) {
 			instantiationString = instantiationString.concat(getPad()
 					+ "this.is" + prefix + penumRefName + "Updated = true;"
 					+ LINE_SEPARATOR);
 		}
+
 		instantiationString = instantiationString.concat(getPad()
 				+ "log4j.debug(\"setting value of \\\"" + penumRef.getName()
 				+ "\\\" to: \" + kvp.getValue());" + LINE_SEPARATOR);
@@ -4167,6 +4131,7 @@ public class JByteByByteGenerator implements IGenerator {
 		instantiationString = instantiationString.concat(getPad() + "//this."
 				+ penumRef.getName() + " = " + penumRef.getPenum().getName()
 				+ ".valueOf(kvp.getValue());" + LINE_SEPARATOR);
+		theLevel--;
 		instantiationString = instantiationString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
 		instantiationString = instantiationString.concat(getPad()
@@ -4284,7 +4249,8 @@ public class JByteByByteGenerator implements IGenerator {
 	private String initAttributeMethods(String name,
 			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs) {
 		attributeInitString = "";
-		isFirst = true;
+
+		boolean isFirst = true;
 
 		for (AbstractAttribute abstractAttribute : attributes) {
 			String attributeName = abstractAttribute.getName();
@@ -4570,7 +4536,6 @@ public class JByteByByteGenerator implements IGenerator {
 				+ "theErrorMsg = errorMsg;" + LINE_SEPARATOR);
 		attributeInitString = attributeInitString.concat(getPad() + "}"
 				+ LINE_SEPARATOR);
-		attributeInitString = attributeInitString.concat(LINE_SEPARATOR);
 
 		return attributeInitString;
 	}
@@ -4672,7 +4637,8 @@ public class JByteByByteGenerator implements IGenerator {
 			attributeInitString = attributeInitString.concat(getPad()
 					+ "else {" + LINE_SEPARATOR);
 			attributeInitString = attributeInitString
-					.concat(buildMissingAttributeExceptionString(attribute.getName()));
+					.concat(buildMissingAttributeExceptionString(attribute
+							.getName()));
 			attributeInitString = attributeInitString.concat(getPad() + "}"
 					+ LINE_SEPARATOR);
 		}
@@ -4755,7 +4721,6 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 		attributeInitString = attributeInitString.concat(LINE_SEPARATOR);
 		theLevel++;
-		isFirst = true;
 		prefix = test;
 
 		// Catch models that have recursive attributes
@@ -4848,9 +4813,9 @@ public class JByteByByteGenerator implements IGenerator {
 							.concat(LINE_SEPARATOR);
 				} else {
 					attributeInitString = attributeInitString.concat(getPad()
-							+ " else {" + LINE_SEPARATOR);	
+							+ " else {" + LINE_SEPARATOR);
 					attributeInitString = attributeInitString
-							.concat(buildMissingAttributeExceptionString( toFirstLower(attributeName)));
+							.concat(buildMissingAttributeExceptionString(toFirstLower(attributeName)));
 					attributeInitString = attributeInitString.concat(getPad()
 							+ "}" + LINE_SEPARATOR);
 				}
@@ -4925,7 +4890,8 @@ public class JByteByByteGenerator implements IGenerator {
 				attributeInitString = attributeInitString.concat(" else {"
 						+ LINE_SEPARATOR);
 				attributeInitString = attributeInitString
-						.concat(buildMissingAttributeExceptionString(penumRef.getName()));
+						.concat(buildMissingAttributeExceptionString(penumRef
+								.getName()));
 				attributeInitString = attributeInitString.concat(getPad() + "}"
 						+ LINE_SEPARATOR);
 			}
@@ -5086,7 +5052,8 @@ public class JByteByByteGenerator implements IGenerator {
 			attributeInitString = attributeInitString.concat(getPad()
 					+ "else {" + LINE_SEPARATOR);
 			attributeInitString = attributeInitString
-					.concat(buildMissingAttributeExceptionString(penumRef.getName()));
+					.concat(buildMissingAttributeExceptionString(penumRef
+							.getName()));
 			attributeInitString = attributeInitString.concat(getPad() + "}"
 					+ LINE_SEPARATOR);
 		}
@@ -5147,7 +5114,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "public " + className
 				+ "(String description) {" + LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "super(description);"
+		toString = toString.concat(getPad(1) + "super(description);"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat("}" + LINE_SEPARATOR);
@@ -6404,6 +6371,45 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
+		// insertBoolean()
+		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ " * This method inserts a Boolean into a byte array at a given offset"
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * in the byte array."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ " * @param offset The offset in bytes in the byte array."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ " * @param b The Boolean value to be inserted."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * @return The byte array."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "public static byte[] insertBoolean(byte[] byteArray, int offset, Boolean b) {"
+						+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "byte[] bytes = ByteBuffer.allocate(1).put((byte) (b == true ? 1 : 0)).array();"
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "byteArray = insertBytes(byteArray, offset, bytes);"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "return byteArray;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+
 		// insertBooleans()
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
@@ -7443,6 +7449,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad()
 				+ "private String theErrorMsg = null;" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
+		
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * The " + className
 				+ " constructor." + LINE_SEPARATOR);
@@ -7462,7 +7469,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ log2(theMessageList.size() + theSubTypeList.size()) + ";"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
-
+		
 		/*
 		 * Available messages...
 		 */
@@ -8166,7 +8173,7 @@ public class JByteByByteGenerator implements IGenerator {
 					+ className
 					+ "("
 					+ buildParameterList(className.length(), attributes,
-							penumRefs) + ") {" + LINE_SEPARATOR);
+							penumRefs) + LINE_SEPARATOR);
 			theLevel++;
 			toString = toString.concat(buildParameterAssignments(attributes,
 					penumRefs) + LINE_SEPARATOR);
@@ -8192,7 +8199,6 @@ public class JByteByByteGenerator implements IGenerator {
 			}
 		}
 
-		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(buildSetErrorMsgMethod());
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(buildGetErrorMsgMethod());
@@ -8723,11 +8729,20 @@ public class JByteByByteGenerator implements IGenerator {
 
 		for (Attribute attribute : listOfAttributes) {
 			String attributeType = attribute.getAttributeType().getLiteral();
+
 			if (attributeType.equals(AttributeType.CHAR.toString())) {
 				attributeType = "Character";
 			} else {
 				attributeType = toFirstUpper(attribute.getAttributeType()
 						.getLiteral());
+			}
+
+			toString = toString.concat(LINE_SEPARATOR);
+
+			if (attribute.getAttributeType() == AttributeType.STRING) {
+				toString = toString.concat(getPad() + "if ("
+						+ attribute.getName() + " != null) {" + LINE_SEPARATOR);
+				theLevel++;
 			}
 
 			if (attribute.getListOf() == null) {
@@ -8736,6 +8751,7 @@ public class JByteByByteGenerator implements IGenerator {
 				toString = toString.concat(getPad(1) + "+ ((" + attributeType
 						+ ") " + attribute.getName() + ").hashCode();"
 						+ LINE_SEPARATOR);
+
 			} else {
 				toString = toString.concat(getPad() + "for (" + attributeType
 						+ " " + attributeType.toLowerCase().substring(0, 1)
@@ -8748,8 +8764,14 @@ public class JByteByByteGenerator implements IGenerator {
 
 				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 			}
+
+			if (attribute.getAttributeType() == AttributeType.STRING) {
+				theLevel--;
+				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+			}
 		}
 
+		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad() + "return result;" + LINE_SEPARATOR);
 		theLevel--;
@@ -8881,7 +8903,7 @@ public class JByteByByteGenerator implements IGenerator {
 		int id = 0;
 		for (PEnumElement element : elements) {
 			toString = toString.concat(getPad() + " "
-					+ element.getName().toUpperCase() + "(" + id + ", \""
+					+ handleCamelCase(element.getName()) + "(" + id + ", \""
 					+ element.getName() + "\")")
 					+ (elements.get(elements.size() - 1).getName()
 							.equals(element.getName()) == false ? "," : ";");
@@ -8972,6 +8994,7 @@ public class JByteByByteGenerator implements IGenerator {
 	private String generateInitializationFile(String packageName, Message msg) {
 		theLevel = 0;
 		String toString = "";
+
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -9104,6 +9127,7 @@ public class JByteByByteGenerator implements IGenerator {
 				msg.getEnums()));
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+
 		return toString;
 	}
 
@@ -9250,26 +9274,30 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "instantiate" + msg.getName()
 				+ "Attributes(element);" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "for (AbstractAttribute abstractAttribute : element.getAbstractAttributes()) {"
+						+ LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
-				+ "for (AbstractAttribute abstractAttribute : element"
+				+ "for (Element e : abstractAttribute.getElements()) {"
 				+ LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
-				+ "      .getAbstractAttributes()) {" + LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ "   for (Element e : abstractAttribute.getElements()) {"
-				+ LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ "      log4j.debug(\"element name: \" + e.getName());"
+				+ "log4j.debug(\"element name: \" + e.getName());"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "instantiate" + msg.getName()
 				+ "SubTypeRefs(e);" + LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "log4j.debug(\"Leaving \" + METHOD);" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return "
 				+ toFirstLower(msg.getName()) + ";" + LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
@@ -9283,6 +9311,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "private void instantiate"
 				+ msg.getName() + "Attributes(Element element) {"
 				+ LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "final String METHOD = \"instantiate" + msg.getName()
 				+ "Attributes()\";" + LINE_SEPARATOR);
@@ -9307,23 +9336,26 @@ public class JByteByByteGenerator implements IGenerator {
 				.concat(getPad() + "log4j.debug(\"value: \" + kvp.getValue());"
 						+ LINE_SEPARATOR);
 
+		boolean isFirst = true;
 		for (Attribute attribute : toAttributeList(msg.getAttributes())) {
 			instantiationString = "";
 			if (attribute.getListOf() != null) {
 				toString = toString.concat(instantiateMsgAttributeList(
-						toFirstLower(msg.getName()), attribute));
+						toFirstLower(msg.getName()), attribute, isFirst));
 			} else {
 				toString = toString.concat(instantiateMsgAttribute(
-						toFirstLower(msg.getName()), attribute));
+						toFirstLower(msg.getName()), attribute, isFirst));
 			}
+			isFirst = false;
 		}
 
 		isFirst = true;
 		for (PEnumRef penumRef : msg.getEnums()) {
 			instantiationString = "";
 			toString = toString.concat(getPad()
-					+ instantiatePEnumRef(msg.getName(), penumRef)
+					+ instantiatePEnumRef(msg.getName(), penumRef, isFirst)
 					+ LINE_SEPARATOR);
+			isFirst = false;
 		}
 
 		theLevel--;
@@ -9374,6 +9406,7 @@ public class JByteByByteGenerator implements IGenerator {
 		theLevel--;
 		toString = toString.concat(LINE_SEPARATOR);
 
+		isFirst = true;
 		for (SubTypeRef subTypeRef : toSubTypeRefList(msg.getAttributes())) {
 			toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 			toString = toString.concat(getPad()
@@ -9390,7 +9423,9 @@ public class JByteByByteGenerator implements IGenerator {
 					+ toFirstUpper(subTypeRef.getName())
 					+ "(Element element) {" + LINE_SEPARATOR);
 			theLevel++;
+
 			instantiationString = "";
+
 			if (subTypeRef.getListOf() != null) {
 				toString = toString.concat(getPad()
 						+ instantiateSubTypeRefList(msg, subTypeRef));
@@ -9430,10 +9465,8 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		instantiationString = "";
-		toString = toString.concat(getPad()
-				+ buildValidationMethod(msg.getAttributes(), msg.getEnums())
+		toString = toString.concat(buildValidationMethod(msg.getAttributes(), msg.getEnums())
 				+ LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "if (result != null) {"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad(1)
@@ -9483,6 +9516,7 @@ public class JByteByByteGenerator implements IGenerator {
 			toString = toString.concat(getPad() + "import java.util.Date;"
 					+ LINE_SEPARATOR);
 		}
+
 		toString = toString.concat(getPad() + "import java.util.ArrayList;"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "import java.util.List;"
@@ -9506,6 +9540,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "public class Instantiate"
 				+ subType.getName() + " {" + LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "private static Logger log4j = Logger.getLogger(Instantiate"
 				+ subType.getName() + ".class);" + LINE_SEPARATOR);
@@ -9554,11 +9589,13 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "public Instantiate"
 				+ subType.getName() + "(Element element) {" + LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad() + "this.element = element;"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "this."
 				+ toFirstLower(subType.getName()) + " = new "
 				+ subType.getName() + "();" + LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
@@ -9571,6 +9608,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "protected " + subType.getName()
 				+ " instantiate() {" + LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "final String METHOD = \"instantiate()\";" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
@@ -9585,8 +9623,9 @@ public class JByteByByteGenerator implements IGenerator {
 						+ "for (AbstractAttribute abstractAttribute : element.getAbstractAttributes()) {"
 						+ LINE_SEPARATOR);
 		theLevel++;
-		toString = toString.concat(getPad()
-				+ instantiateSubTypeElements(subType) + LINE_SEPARATOR);
+		toString = toString.concat(instantiateSubTypeElements(subType)
+				+ LINE_SEPARATOR);
+
 		toString = toString.concat(LINE_SEPARATOR);
 		if (subType.getAttributes().size() != 0
 				|| subType.getEnums().size() != 0) {
@@ -9594,8 +9633,10 @@ public class JByteByByteGenerator implements IGenerator {
 					.concat(getPad()
 							+ "for (KeyValuePair kvp : abstractAttribute.getKeyValuePairs()) {"
 							+ LINE_SEPARATOR);
-			toString = toString.concat(getPad(1)
-					+ instantiateSubTypeAttributes(subType) + LINE_SEPARATOR);
+			theLevel++;
+			toString = toString.concat(instantiateSubTypeAttributes(subType)
+					+ LINE_SEPARATOR);
+			theLevel--;
 			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		}
 		theLevel--;
@@ -9633,10 +9674,8 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		instantiationString = "";
-		toString = toString.concat(getPad()
-				+ buildValidationMethod(subType.getAttributes(),
+		toString = toString.concat(buildValidationMethod(subType.getAttributes(),
 						subType.getEnums()) + LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "if (result != null) {"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad(1)
@@ -9728,9 +9767,11 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "public Initialize"
 				+ subType.getName() + "(" + subType.getName() + " "
 				+ toFirstLower(subType.getName()) + ") {" + LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad() + "this."
 				+ toFirstLower(subType.getName()) + " = "
 				+ toFirstLower(subType.getName()) + ";" + LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
@@ -9763,6 +9804,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "if ("
 				+ toFirstLower(subType.getName()) + " != null) {"
 				+ LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "log4j.debug(\"Creating new element: \" + elementName);"
 				+ LINE_SEPARATOR);
@@ -9773,12 +9815,14 @@ public class JByteByByteGenerator implements IGenerator {
 				+ initAbstractAttributes(toFirstLower(subType.getName()),
 						subType.getAttributes(), subType.getEnums()) + ""
 				+ LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "log4j.debug(\"Leaving \" + METHOD);" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return element;"
 				+ LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad()
