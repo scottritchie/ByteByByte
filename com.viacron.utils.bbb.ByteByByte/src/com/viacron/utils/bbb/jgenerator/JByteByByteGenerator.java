@@ -603,8 +603,8 @@ public class JByteByByteGenerator implements IGenerator {
 		parameterList = parameterList.concat("// Entered buildParameterList()");
 
 		for (AbstractAttribute attribute : attributes) {
-			parameterList = parameterList.concat((isFirst ? "" : ",") + LINE_SEPARATOR
-					 + getPad() + "        ");
+			parameterList = parameterList.concat((isFirst ? "" : ",")
+					+ LINE_SEPARATOR + getPad() + "        ");
 			isFirst = false;
 
 			int i = 0;
@@ -628,7 +628,7 @@ public class JByteByByteGenerator implements IGenerator {
 					}
 				} else {
 					String attributeType = attr.getAttributeType().getLiteral();
-					
+
 					if (attributeType.equals(AttributeType.CHAR.toString())) {
 						attributeType = "Character";
 					} else if (attributeType.equals(AttributeType.CALENDAR
@@ -667,12 +667,13 @@ public class JByteByByteGenerator implements IGenerator {
 				parameterList = parameterList.concat(" ");
 				i++;
 			}
-			
+
 			parameterList = parameterList.concat(penumRef.getPenum().getName())
 					+ " " + penumRef.getName();
 		}
 
-		parameterList = parameterList.concat(") { // Leaving buildParameterList()");
+		parameterList = parameterList
+				.concat(") { // Leaving buildParameterList()");
 		return parameterList;
 	}
 
@@ -832,11 +833,35 @@ public class JByteByByteGenerator implements IGenerator {
 					parameterAssignments = parameterAssignments.concat(getPad()
 							+ "}" + LINE_SEPARATOR);
 				} else {
+					if (subTypeRef.getOptional() != null) {
+						parameterAssignments = parameterAssignments
+								.concat(getPad() + "if ("
+										+ toFirstLower(className) + ".get"
+										+ toFirstUpper(subTypeRef.getName())
+										+ "() != null) {" + LINE_SEPARATOR);
+						theLevel++;
+					}
+
+					parameterAssignments = parameterAssignments.concat(getPad()
+							+ toFirstUpper(subTypeRef.getSubType().getName())
+							+ " " + "_"
+							+ toFirstLower(subTypeRef.getSubType().getName())
+							+ " = new "
+							+ toFirstUpper(subTypeRef.getSubType().getName())
+							+ "(" + toFirstLower(className) + ".get"
+							+ toFirstUpper(subTypeRef.getName()) + "());"
+							+ LINE_SEPARATOR);
 					parameterAssignments = parameterAssignments.concat(getPad()
 							+ "this.set" + toFirstUpper(subTypeRef.getName())
-							+ "(new " + subTypeRef.getSubType().getName() + "("
+							+ "(_"
 							+ toFirstLower(subTypeRef.getSubType().getName())
-							+ "));" + LINE_SEPARATOR);
+							+ ");" + LINE_SEPARATOR);
+
+					if (subTypeRef.getOptional() != null) {
+						theLevel--;
+						parameterAssignments = parameterAssignments
+								.concat(getPad() + "}" + LINE_SEPARATOR);
+					}
 				}
 			}
 		}
@@ -1187,8 +1212,8 @@ public class JByteByByteGenerator implements IGenerator {
 			EList<PEnumRef> penumRefs) {
 		final String METHOD = "buildValidationMethod()";
 
-		instantiationString = instantiationString.concat(getPad() + "// Entered " + METHOD
-				+ LINE_SEPARATOR);
+		instantiationString = instantiationString.concat(getPad()
+				+ "// Entered " + METHOD + LINE_SEPARATOR);
 		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : attributes) {
 			if (abstractAttribute.getOptional() == null) {
@@ -1257,9 +1282,9 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 			}
 		}
-		
-		instantiationString = instantiationString.concat(getPad() + "// Leaving " + METHOD
-				+ LINE_SEPARATOR);
+
+		instantiationString = instantiationString.concat(getPad()
+				+ "// Leaving " + METHOD + LINE_SEPARATOR);
 
 		return instantiationString;
 	}
@@ -1292,6 +1317,28 @@ public class JByteByByteGenerator implements IGenerator {
 				+ attribute
 				+ "\\\" is required, but no value was provided.\");"
 				+ LINE_SEPARATOR);
+		exceptionString = exceptionString.concat(getPad()
+				+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
+		exceptionString = exceptionString.concat(getPad()
+				+ "throw new MissingAttributeException(getErrorMsg());"
+				+ LINE_SEPARATOR);
+		theLevel--;
+
+		return exceptionString;
+	}
+
+	private String buildMissingAttributeExceptionString(String attribute,
+			String element) {
+		theLevel++;
+		String exceptionString = getPad()
+				+ "// Missing required attribute, generate an error message and throw an exception"
+				+ LINE_SEPARATOR;
+		exceptionString = exceptionString
+				.concat(getPad()
+						+ "setErrorMsg(String.format(\"Error packing object. "
+						+ "The attribute \\\"%s\\\" of element \\\"%s\\\" is required, but no value was provided.\", \""
+						+ attribute + "\", \"" + element + "\"));"
+						+ LINE_SEPARATOR);
 		exceptionString = exceptionString.concat(getPad()
 				+ "log4j.error(getErrorMsg());" + LINE_SEPARATOR);
 		exceptionString = exceptionString.concat(getPad()
@@ -2517,7 +2564,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ " * Convert object to byte array." + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * See convertObjectToByteArray() in JBitByBitGenerator.java."
+						+ " * See convertObjectToByteArray() in JByteByByteGenerator.java."
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(convertObjectToByteArray(className,
@@ -2590,9 +2637,10 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * Convert object to String."
 				+ LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ " * See convertObjectToString() in JBitByBitGenerator.java."
-				+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ " * See convertObjectToString() in JByteByByteGenerator.java."
+						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(convertObjectToString(className,
 				nbrOfAttributes != 0 || nbrOfPEnumRefs != 0));
@@ -4755,7 +4803,6 @@ public class JByteByByteGenerator implements IGenerator {
 
 	private String initAbstractAttributes(String name,
 			List<AbstractAttribute> abstractAttributes, List<PEnumRef> penumRefs) {
-		theLevel = 0;
 		boolean isFirst = true;
 
 		attributeInitString = "";
@@ -4812,17 +4859,19 @@ public class JByteByByteGenerator implements IGenerator {
 					attributeInitString = attributeInitString
 							.concat(LINE_SEPARATOR);
 				} else {
-					attributeInitString = attributeInitString.concat(getPad()
-							+ " else {" + LINE_SEPARATOR);
+					attributeInitString = attributeInitString.concat(" else {"
+							+ LINE_SEPARATOR);
 					attributeInitString = attributeInitString
-							.concat(buildMissingAttributeExceptionString(toFirstLower(attributeName)));
+							.concat(buildMissingAttributeExceptionString(
+									toFirstLower(attributeName),
+									toFirstLower(name)));
 					attributeInitString = attributeInitString.concat(getPad()
 							+ "}" + LINE_SEPARATOR);
 				}
 			} else if (isRecursiveList == true) {
-				attributeInitString = attributeInitString.concat("if (" + name
-						+ ".get" + attributeName + "() != null) {"
-						+ LINE_SEPARATOR);
+				attributeInitString = attributeInitString.concat(getPad()
+						+ "if (" + name + ".get" + attributeName
+						+ "() != null) {" + LINE_SEPARATOR);
 				theLevel++;
 				attributeInitString = attributeInitString.concat(getPad()
 						+ "int " + abstractAttribute.getName() + "Index = 0;"
@@ -4872,8 +4921,9 @@ public class JByteByByteGenerator implements IGenerator {
 		for (PEnumRef penumRef : penumRefs) {
 			String penumRefName = toFirstUpper(penumRef.getName());
 			attributeInitString = attributeInitString.concat(LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat("if (" + name
-					+ ".get" + penumRefName + "() != null) {" + LINE_SEPARATOR);
+			attributeInitString = attributeInitString.concat(getPad() + "if ("
+					+ name + ".get" + penumRefName + "() != null) {"
+					+ LINE_SEPARATOR);
 			attributeInitString = attributeInitString.concat(getPad()
 					+ "AbstractAttribute abstractAttribute = initialize"
 					+ penumRefName + "(" + name + ".get" + penumRefName
@@ -4881,14 +4931,14 @@ public class JByteByByteGenerator implements IGenerator {
 			attributeInitString = attributeInitString.concat(getPad()
 					+ "element.getAbstractAttributes().add(abstractAttribute);"
 					+ LINE_SEPARATOR);
-			attributeInitString = attributeInitString.concat("}");
+			attributeInitString = attributeInitString.concat(getPad() + "}");
 
 			if (penumRef.getOptional() != null) {
 				attributeInitString = attributeInitString
 						.concat(LINE_SEPARATOR);
 			} else {
-				attributeInitString = attributeInitString.concat(" else {"
-						+ LINE_SEPARATOR);
+				attributeInitString = attributeInitString.concat(getPad()
+						+ " else {" + LINE_SEPARATOR);
 				attributeInitString = attributeInitString
 						.concat(buildMissingAttributeExceptionString(penumRef
 								.getName()));
@@ -5085,7 +5135,7 @@ public class JByteByByteGenerator implements IGenerator {
 
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by ByteByByteGenerator.xtend (see"
 						+ LINE_SEPARATOR);
 		toString = toString
 				.concat(" * generateMissingAttributeExceptionClass())."
@@ -5128,7 +5178,7 @@ public class JByteByByteGenerator implements IGenerator {
 		String toString = "";
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(" * generateDirectoryEntryClass())."
 				+ LINE_SEPARATOR);
@@ -5386,7 +5436,7 @@ public class JByteByByteGenerator implements IGenerator {
 		String toString = "";
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(" * generateRootClassEnumFile())."
 				+ LINE_SEPARATOR);
@@ -5540,7 +5590,7 @@ public class JByteByByteGenerator implements IGenerator {
 		String toString = "";
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(" * generateUtilityClassFile())."
 				+ LINE_SEPARATOR);
@@ -7418,7 +7468,7 @@ public class JByteByByteGenerator implements IGenerator {
 		String toString = "";
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(" * generateRootClassFile())."
 				+ LINE_SEPARATOR);
@@ -7449,7 +7499,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad()
 				+ "private String theErrorMsg = null;" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
-		
+
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * The " + className
 				+ " constructor." + LINE_SEPARATOR);
@@ -7469,7 +7519,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ log2(theMessageList.size() + theSubTypeList.size()) + ";"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
-		
+
 		/*
 		 * Available messages...
 		 */
@@ -7494,7 +7544,7 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * BitByBit format. The object must be one of the following classes:"
+						+ " * ByteByByte format. The object must be one of the following classes:"
 						+ LINE_SEPARATOR);
 		for (Message e : theMessageList) {
 			toString = toString.concat(getPad() + " *   " + e.getName()
@@ -7505,7 +7555,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * @return A byte array which represents the message object in BitByBit"
+						+ " * @return A byte array which represents the message object in ByteByByte"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " *         format."
 				+ LINE_SEPARATOR);
@@ -7567,7 +7617,7 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * BitByBit format. The object must be one of the following classes:"
+						+ " * ByteByByte format. The object must be one of the following classes:"
 						+ LINE_SEPARATOR);
 		for (Message e : theMessageList) {
 			toString = toString.concat(getPad() + " *   " + e.getName()
@@ -7578,7 +7628,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * @return A String which represents the message object in BitByBit"
+						+ " * @return A String which represents the message object in ByteByByte"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " *         format."
 				+ LINE_SEPARATOR);
@@ -7640,7 +7690,7 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * BitByBit format. The returned object will be one of the following"
+						+ " * ByteByByte format. The returned object will be one of the following"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * classes:" + LINE_SEPARATOR);
 		for (Message e : theMessageList) {
@@ -7702,7 +7752,7 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * BitByBit format. The returned object will be one of the following"
+						+ " * ByteByByte format. The returned object will be one of the following"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * classes:" + LINE_SEPARATOR);
 		for (Message e : theMessageList) {
@@ -7868,14 +7918,23 @@ public class JByteByByteGenerator implements IGenerator {
 		theLevel++;
 		toString = toString.concat(getPad() + "short id = " + rootClass
 				+ "Utility.getShort(buffer, 0);" + LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "log4j.debug(String.format(\"id: %d\", id));"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		
 		toString = toString.concat(getPad() + "" + toFirstLower(rootClass)
 				+ "Enum = " + rootClass + "Enum.toEnum(id);" + LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "if (" + toFirstLower(rootClass) + "Enum != null) {"
+				+ LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "log4j.debug(String.format(\"ID: %d (%s)\", "
 				+ toFirstLower(rootClass) + "Enum.getId()," + LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "" + toFirstLower(rootClass)
+		toString = toString.concat(getPad(1) + "" + toFirstLower(rootClass)
 				+ "Enum.getName()));" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
@@ -7986,7 +8045,7 @@ public class JByteByByteGenerator implements IGenerator {
 
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(" * " + METHOD + "). " + LINE_SEPARATOR);
 		toString = toString.concat(" * Do not edit." + LINE_SEPARATOR);
@@ -8136,7 +8195,7 @@ public class JByteByByteGenerator implements IGenerator {
 					+ LINE_SEPARATOR);
 			toString = toString
 					.concat(getPad()
-							+ " * See buildInstanceVariables() in JBitByBitGenerator.java."
+							+ " * See buildInstanceVariables() in JByteByByteGenerator.java."
 							+ LINE_SEPARATOR);
 			toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 			toString = toString.concat(buildInstanceVariables(attributes,
@@ -8162,7 +8221,7 @@ public class JByteByByteGenerator implements IGenerator {
 					+ " constructor." + LINE_SEPARATOR);
 			toString = toString
 					.concat(getPad()
-							+ " * See buildParameterAnnotations() in JBitByBitGenerator.java."
+							+ " * See buildParameterAnnotations() in JByteByByteGenerator.java."
 							+ LINE_SEPARATOR);
 			toString = toString.concat(getPad() + " *" + LINE_SEPARATOR);
 			toString = toString.concat(buildParameterAnnotations(attributes,
@@ -8879,7 +8938,7 @@ public class JByteByByteGenerator implements IGenerator {
 		String toString = "";
 		toString = toString.concat("/*" + LINE_SEPARATOR);
 		toString = toString
-				.concat(" * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+				.concat(" * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(" * generateEnumFile()). " + LINE_SEPARATOR);
 		toString = toString.concat(" * Do not edit." + LINE_SEPARATOR);
@@ -8998,7 +9057,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+						+ " * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * generateInitializationFile()). " + LINE_SEPARATOR);
@@ -9137,7 +9196,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+						+ " * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * generateInstantiationFile()). " + LINE_SEPARATOR);
@@ -9213,7 +9272,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + " * that are not optional. "
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * See buildFlags() in JBitByBitGenerator.java."
+				+ " * See buildFlags() in JByteByByteGenerator.java."
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(buildFlags(msg.getAttributes(),
@@ -9465,8 +9524,8 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		instantiationString = "";
-		toString = toString.concat(buildValidationMethod(msg.getAttributes(), msg.getEnums())
-				+ LINE_SEPARATOR);
+		toString = toString.concat(buildValidationMethod(msg.getAttributes(),
+				msg.getEnums()) + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "if (result != null) {"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad(1)
@@ -9492,7 +9551,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+						+ " * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * generateSubTypeInstantiationFile())." + LINE_SEPARATOR);
@@ -9570,7 +9629,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + " * that are not optional. "
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * See buildFlags() in JBitByBitGenerator.java."
+				+ " * See buildFlags() in JByteByByteGenerator.java."
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(buildFlags(subType.getAttributes(),
@@ -9674,8 +9733,9 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		instantiationString = "";
-		toString = toString.concat(buildValidationMethod(subType.getAttributes(),
-						subType.getEnums()) + LINE_SEPARATOR);
+		toString = toString.concat(buildValidationMethod(
+				subType.getAttributes(), subType.getEnums())
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "if (result != null) {"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad(1)
@@ -9702,7 +9762,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * WARNING: This file was generated by BitByBitGenerator.xtend (see"
+						+ " * WARNING: This file was generated by JByteByByteGenerator.java (see"
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * generateSubTypeInitializationFile())." + LINE_SEPARATOR);
@@ -9794,6 +9854,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "    throws MissingAttributeException {" + LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "final String METHOD = \"initialize()\";" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
@@ -9811,10 +9872,9 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad()
 				+ "element = new Element(elementName);" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ initAbstractAttributes(toFirstLower(subType.getName()),
-						subType.getAttributes(), subType.getEnums()) + ""
-				+ LINE_SEPARATOR);
+		toString = toString.concat(initAbstractAttributes(
+				toFirstLower(subType.getName()), subType.getAttributes(),
+				subType.getEnums()) + "" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
@@ -9829,6 +9889,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ initAttributeMethods(toFirstLower(subType.getName()),
 						subType.getAttributes(), subType.getEnums()) + ""
 				+ LINE_SEPARATOR);
+		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		return toString;
 	}
