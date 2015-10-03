@@ -75,13 +75,13 @@ public class JByteByByteGenerator implements IGenerator {
 	private String prefix = "";
 	private String objectName = "";
 	private String method = "";
+	private String packageName = "";
 	private int theLevel = 0;
 
 	private boolean isDebug = false;
 
 	@Override
 	public void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		String packageName = "";
 		String className = "";
 		String penumName = "";
 		String fullPath = packagePath(resource);
@@ -134,6 +134,13 @@ public class JByteByByteGenerator implements IGenerator {
 				fullPath + "/" + directoryEntryClassName + ".java",
 				generateDirectoryEntryClass(packageName,
 						directoryEntryClassName));
+
+		// Generate the root DirectoryInfoItem class
+		String directoryInfoItemClassName = grammarName + "DirectoryInfoItem";
+		fsa.generateFile(
+				fullPath + "/" + directoryInfoItemClassName + ".java",
+				generateDirectoryInfoItemClass(packageName,
+						directoryInfoItemClassName));
 
 		// Generate the utility class file
 		fsa.generateFile(fullPath + "/" + rootClass + "Utility.java",
@@ -940,11 +947,20 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 
 		/*
-		 * Return the offset in bytes by dividing the offset in bits by 8 and
+		 * Calculate the offset in bytes by dividing the offset in bits by 8 and
 		 * then adding one byte if the offset in bits is not evenly divisible by
 		 * 8.
 		 */
-		return Math.round(offsetInBits / 8) + (offsetInBits % 8 == 0 ? 0 : 1);
+		int offsetInBytes = Math.round(offsetInBits / 8)
+				+ (offsetInBits % 8 == 0 ? 0 : 1);
+
+		/*
+		 * Now set the offset to a 4 byte word boundary
+		 */
+		int remainder = offsetInBytes % 4;
+		int pad = (remainder == 0 ? 0 : 4 - remainder);
+
+		return offsetInBytes + pad;
 	}
 
 	private boolean hasAttribute(AbstractAttribute parent,
@@ -1547,9 +1563,10 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		theLevel++;
 		toString = toString.concat(getPad()
-				+ "final String METHOD = \"pack()\";" + LINE_SEPARATOR);
+				+ "final String METHOD = \".pack()\";" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ "log4j.debug(\"Entered \" + METHOD);" + LINE_SEPARATOR);
+				+ "log4j.debug(\"Entered \" + CLAZZ + METHOD);"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
 		toString = toString.concat(getPad() + "int byteArraySize = get"
@@ -1669,7 +1686,8 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 
 		for (PEnumRef penumRef : penumRefs) {
-			if (penumRef.getOptional() == null) {
+			boolean isOptional = (penumRef.getOptional() != null);
+			if (isOptional == false) {
 				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
 
 				toString = toString
@@ -1708,63 +1726,8 @@ public class JByteByByteGenerator implements IGenerator {
 
 		toString = toString.concat(LINE_SEPARATOR);
 
-		for (AbstractAttribute abstractAttribute : attributes) {
-			if (abstractAttribute instanceof Attribute) {
-				Attribute attribute = (Attribute) abstractAttribute;
-				AttributeType primitiveType = attribute.getAttributeType();
-				boolean isList = attribute.getListOf() != null;
-
-				if (isDirectoryEntry(abstractAttribute) == true) {
-					/*
-					 * By default, build the method that gets the length of the
-					 * attribute if the attribute is a string, otherwise use the
-					 * length of the primitive type.
-					 */
-					String getter = "this.get"
-							+ toFirstUpper(attribute.getName()) + "()";
-					String getLengthString = getter + " != null ? " + getter
-							+ "." + (isList == false ? "length" : "size")
-							+ "() : 0";
-
-					/*
-					 * Handle optional primitives that aren't in lists and
-					 * aren't strings.
-					 */
-					if (isList == false
-							&& primitiveType != AttributeType.STRING) {
-						getLengthString = getPrimitiveSize(primitiveType
-								.getLiteral());
-					}
-
-					toString = toString.concat(getPad() + className + "Enum."
-							+ handleCamelCase(attribute.getName())
-							+ ".setLength(" + getLengthString + ");"
-							+ LINE_SEPARATOR);
-				}
-			} else if (abstractAttribute instanceof SubTypeRef) {
-				SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
-				boolean isList = subTypeRef.getListOf() != null;
-
-				String getLengthString = "this.get"
-						+ toFirstUpper(subTypeRef.getName())
-						+ "()."
-						+ (isList == false ? "get"
-								+ toFirstUpper(subTypeRef.getSubType()
-										.getName()) + "Size());" : "size());");
-
-				toString = toString.concat(getPad() + className + "Enum."
-						+ handleCamelCase(subTypeRef.getName()) + ".setLength("
-						+ getLengthString + LINE_SEPARATOR);
-			}
-		}
-
-		for (PEnumRef penumRef : penumRefs) {
-			if (penumRef.getOptional() != null) {
-				toString = toString.concat(getPad() + className + "Enum."
-						+ handleCamelCase(penumRef.getName())
-						+ ".setLength(1);" + LINE_SEPARATOR);
-			}
-		}
+		toString = toString.concat(buildArrayOfDirectoryInfoItems(className,
+				attributes, penumRefs));
 
 		toString = toString.concat(LINE_SEPARATOR);
 
@@ -1772,6 +1735,12 @@ public class JByteByByteGenerator implements IGenerator {
 				.concat(getPad() + "int directorySize = get"
 						+ toFirstUpper(className) + "DirectorySize();"
 						+ LINE_SEPARATOR);
+
+		toString = toString.concat(getPad()
+				+ "log4j.debug(\"directorySize: \" + directorySize);"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+
 		toString = toString.concat(getPad() + "if (directorySize != 0) {"
 				+ LINE_SEPARATOR);
 		theLevel++;
@@ -1810,21 +1779,48 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(LINE_SEPARATOR);
 
 		if (attributes.size() > 0) {
-			toString = toString.concat(getPad() + "for (" + className + "Enum "
-					+ toFirstLower(className) + "Enum : " + className
-					+ "Enum.values()) {" + LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "for (" + grammarName
+					+ "DirectoryInfoItem " + toFirstLower(grammarName)
+					+ "DirectoryInfoItem : " + toFirstLower(grammarName)
+					+ "DirectoryInfoItems) {" + LINE_SEPARATOR);
 			theLevel++;
 			toString = toString.concat(getPad() + "if ("
-					+ toFirstLower(className)
-					+ "Enum.isDirectoryEntry == true) {" + LINE_SEPARATOR);
+					+ toFirstLower(grammarName)
+					+ "DirectoryInfoItem.isDirectoryEntry() == true) {"
+					+ LINE_SEPARATOR);
 			theLevel++;
 			toString = toString.concat(getPad() + "int id = "
-					+ toFirstLower(className) + "Enum.getId();"
+					+ toFirstLower(grammarName) + "DirectoryInfoItem.getId();"
 					+ LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "String name = "
+					+ toFirstLower(grammarName)
+					+ "DirectoryInfoItem.getName();" + LINE_SEPARATOR);
 			toString = toString.concat(getPad() + "int length = "
-					+ toFirstLower(className) + "Enum.getLength();"
-					+ LINE_SEPARATOR);
+					+ toFirstLower(grammarName)
+					+ "DirectoryInfoItem.getLength();" + LINE_SEPARATOR);
+
 			toString = toString.concat(LINE_SEPARATOR);
+
+			toString = toString.concat(getPad()
+					+ "log4j.debug(\"index: \" + index);" + LINE_SEPARATOR);
+			toString = toString.concat(getPad()
+					+ "log4j.debug(\"   id: \" + id);" + LINE_SEPARATOR);
+			toString = toString.concat(getPad()
+					+ "log4j.debug(\"   name: \" + name);" + LINE_SEPARATOR);
+			toString = toString
+					.concat(getPad() + "log4j.debug(\"   length: \" + length);"
+							+ LINE_SEPARATOR);
+
+			toString = toString.concat(LINE_SEPARATOR);
+
+			toString = toString.concat(getPad()
+					+ "if (index >= directorySize) {" + LINE_SEPARATOR);
+			toString = toString
+					.concat(getPad(1)
+							+ "log4j.error(\"index out of bounds!\");"
+							+ LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+
 			toString = toString.concat(getPad()
 					+ "theDirectory[index].setId(id);" + LINE_SEPARATOR);
 			toString = toString
@@ -1833,6 +1829,24 @@ public class JByteByByteGenerator implements IGenerator {
 			toString = toString
 					.concat(getPad() + "theDirectory[index].setOffset(offset);"
 							+ LINE_SEPARATOR);
+			toString = toString.concat(LINE_SEPARATOR);
+
+			// Continue if the length is 0
+			toString = toString.concat(getPad()
+					+ "if (offset > byteArraySize) {" + LINE_SEPARATOR);
+			toString = toString.concat(getPad(1)
+					+ "log4j.error(\"offset greater than array size!\");"
+					+ LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+			toString = toString.concat(LINE_SEPARATOR);
+
+			// Continue if the length is 0
+			toString = toString.concat(getPad() + "if (length == 0) {"
+					+ LINE_SEPARATOR);
+			toString = toString.concat(getPad(1) + "index++;" + LINE_SEPARATOR);
+			toString = toString
+					.concat(getPad(1) + "continue;" + LINE_SEPARATOR);
+			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 			toString = toString.concat(LINE_SEPARATOR);
 
 			// Insert the data
@@ -1845,6 +1859,7 @@ public class JByteByByteGenerator implements IGenerator {
 					if (isDirectoryEntry(abstractAttribute) == true) {
 						Attribute attribute = (Attribute) abstractAttribute;
 						boolean isList = attribute.getListOf() != null;
+						boolean isOptional = attribute.getOptional() != null;
 						String attributeType = attribute.getAttributeType()
 								.getLiteral();
 
@@ -1872,10 +1887,17 @@ public class JByteByByteGenerator implements IGenerator {
 									+ "else if (id == ");
 						}
 
-						toString = toString.concat(className + "Enum."
-								+ handleCamelCase(attribute.getName())
-								+ ".getId()) {" + LINE_SEPARATOR);
+						toString = toString.concat(handleCamelCase(className)
+								+ "_" + handleCamelCase(attribute.getName())
+								+ ") {" + LINE_SEPARATOR);
 						theLevel++;
+
+						if (isOptional) {
+							toString = toString.concat(getPad() + "if (get"
+									+ toFirstUpper(attribute.getName())
+									+ "() != null) {" + LINE_SEPARATOR);
+							theLevel++;
+						}
 
 						toString = toString
 								.concat(getPad()
@@ -1910,6 +1932,7 @@ public class JByteByByteGenerator implements IGenerator {
 								toString = toString.concat(getPad() + "}"
 										+ LINE_SEPARATOR);
 							}
+
 							theLevel--;
 							toString = toString.concat(getPad() + "}"
 									+ LINE_SEPARATOR);
@@ -1959,13 +1982,6 @@ public class JByteByByteGenerator implements IGenerator {
 								toString = toString.concat(getPad() + "}"
 										+ LINE_SEPARATOR);
 							} else {
-								toString = toString
-										.concat(getPad()
-												+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
-												+ attribute.getName()
-												+ "\", offset));"
-												+ LINE_SEPARATOR);
-
 								toString = toString.concat(getPad() + "bb = "
 										+ rootClass + "Utility.insert"
 										+ typeName + "s(bb, offset, get"
@@ -1984,10 +2000,17 @@ public class JByteByByteGenerator implements IGenerator {
 										+ LINE_SEPARATOR);
 							}
 						}
+
+						if (isOptional) {
+							theLevel--;
+							toString = toString.concat(getPad() + "}"
+									+ LINE_SEPARATOR);
+						}
 					}
 				} else if (abstractAttribute instanceof SubTypeRef) {
 					SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
 					boolean isList = subTypeRef.getListOf() != null;
+					boolean isOptional = subTypeRef.getOptional() != null;
 
 					if (isFirst == true) {
 						toString = toString.concat(getPad() + "if (id == ");
@@ -1997,10 +2020,17 @@ public class JByteByByteGenerator implements IGenerator {
 								.concat(getPad() + "else if (id == ");
 					}
 
-					toString = toString.concat(className + "Enum."
-							+ handleCamelCase(subTypeRef.getName())
-							+ ".getId()) {" + LINE_SEPARATOR);
+					toString = toString.concat(handleCamelCase(className) + "_"
+							+ handleCamelCase(subTypeRef.getName()) + ") {"
+							+ LINE_SEPARATOR);
 					theLevel++;
+
+					if (isOptional) {
+						toString = toString.concat(getPad() + "if (get"
+								+ toFirstUpper(subTypeRef.getName())
+								+ "() != null) {" + LINE_SEPARATOR);
+						theLevel++;
+					}
 
 					toString = toString
 							.concat(getPad()
@@ -2061,56 +2091,76 @@ public class JByteByByteGenerator implements IGenerator {
 						theLevel--;
 						toString = toString.concat(getPad() + "}"
 								+ LINE_SEPARATOR);
+						toString = toString.concat(getPad() + "index--;"
+								+ LINE_SEPARATOR);
 					}
+
+					if (isOptional) {
+						theLevel--;
+						toString = toString.concat(getPad() + "}"
+								+ LINE_SEPARATOR);
+					}
+
 					theLevel--;
 					toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 				}
 			}
 
 			for (PEnumRef penumRef : penumRefs) {
-				if (penumRef.getOptional() != null) {
-					if (isFirst == true) {
-						toString = toString.concat(getPad() + "if (id == ");
-						isFirst = false;
-					} else {
-						toString = toString
-								.concat(getPad() + "else if (id == ");
-					}
+				// TODO for now, store enums as an integer
+				boolean isOptional = penumRef.getOptional() != null;
 
-					toString = toString.concat(className + "Enum."
-							+ handleCamelCase(penumRef.getName())
-							+ ".getId()) {" + LINE_SEPARATOR);
+				if (isFirst == true) {
+					toString = toString.concat(getPad() + "if (id == ");
+					isFirst = false;
+				} else {
+					toString = toString.concat(getPad() + "else if (id == ");
+				}
+
+				toString = toString.concat(handleCamelCase(className) + "_"
+						+ handleCamelCase(penumRef.getName()) + ") {"
+						+ LINE_SEPARATOR);
+				theLevel++;
+
+				if (isOptional) {
+					toString = toString.concat(getPad() + "if (get"
+							+ toFirstUpper(penumRef.getName())
+							+ "() != null) {" + LINE_SEPARATOR);
 					theLevel++;
+				}
 
-					toString = toString
-							.concat(getPad()
-									+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
-									+ penumRef.getName() + "\", offset));"
-									+ LINE_SEPARATOR);
-					int sizeInBytes = log8(penumRef.getPenum().getElements()
-							.size());
-					int sizeInBits = log2(penumRef.getPenum().getElements()
-							.size());
+				toString = toString
+						.concat(getPad()
+								+ "log4j.debug(String.format(\"inserting %s at offset %d\", \""
+								+ penumRef.getName() + "\", offset));"
+								+ LINE_SEPARATOR);
+				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+				int sizeInBits = log2(penumRef.getPenum().getElements().size());
+				sizeInBytes = 4;
 
-					toString = toString.concat(getPad() + "bb = " + rootClass
-							+ "Utility.insertBitfield(bb, offset * 8, "
-							+ sizeInBits + ", get"
-							+ toFirstUpper(penumRef.getName())
-							+ "().ordinal());" + LINE_SEPARATOR);
+				toString = toString.concat(getPad() + "// bb = " + rootClass
+						+ "Utility.insertBitfield(bb, offset * 8, "
+						+ sizeInBits + ", get"
+						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
+						+ LINE_SEPARATOR);
 
-					toString = toString.concat(getPad() + "// bb = "
-							+ rootClass
-							+ "Utility.insertInteger(bb, offset, get"
-							+ toFirstUpper(penumRef.getName())
-							+ "().ordinal());" + LINE_SEPARATOR);
+				toString = toString.concat(getPad() + "bb = " + rootClass
+						+ "Utility.insertInteger(bb, offset, get"
+						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
+						+ LINE_SEPARATOR);
 
-					toString = toString.concat(getPad() + "offset += "
-							+ sizeInBytes + ";" + LINE_SEPARATOR);
+				toString = toString.concat(getPad() + "offset += "
+						+ sizeInBytes + ";" + LINE_SEPARATOR);
+
+				if (isOptional) {
 					theLevel--;
 					toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 				}
+				theLevel--;
+				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 			}
 
+			toString = toString.concat(LINE_SEPARATOR);
 			toString = toString.concat(getPad() + "index++;" + LINE_SEPARATOR);
 			theLevel--;
 			toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
@@ -2189,7 +2239,8 @@ public class JByteByByteGenerator implements IGenerator {
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ "log4j.debug(\"Leaving \" + METHOD);" + LINE_SEPARATOR);
+				+ "log4j.debug(\"Leaving \" + CLAZZ + METHOD);"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return bb;" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
@@ -2224,9 +2275,10 @@ public class JByteByByteGenerator implements IGenerator {
 				+ " unpack(byte[] ba) {" + LINE_SEPARATOR);
 		theLevel++;
 		toString = toString.concat(getPad()
-				+ "final String METHOD = \"unpack()\";" + LINE_SEPARATOR);
+				+ "final String METHOD = \".unpack()\";" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ "log4j.debug(\"Entered \" + METHOD);" + LINE_SEPARATOR);
+				+ "log4j.debug(\"Entered \" + CLAZZ + METHOD);"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
 		toString = toString.concat(getPad() + className + " "
@@ -2244,17 +2296,21 @@ public class JByteByByteGenerator implements IGenerator {
 							+ toFirstLower(className) + ".set"
 							+ toFirstUpper(attribute.getName()) + "("
 							+ rootClass + "Utility.get" + typeName + "(ba, ");
-					toString = toString.concat(className + "Enum."
+					toString = toString.concat(toFirstLower(grammarName)
+							+ "DirectoryInfoItems["
+							+ handleCamelCase(className) + "_"
 							+ handleCamelCase(attribute.getName())
-							+ ".getOffsetInBits()));" + LINE_SEPARATOR);
+							+ "].getOffsetInBits()));" + LINE_SEPARATOR);
 				}
 			}
 		}
 
 		for (PEnumRef penumRef : penumRefs) {
+			// TODO for now, enums are stored as integers
 			if (penumRef.getOptional() == null) {
 				int sizeInBits = log2(penumRef.getPenum().getElements().size());
 				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+				sizeInBytes = 4;
 
 				if (sizeInBytes == 1) {
 					toString = toString.concat(getPad()
@@ -2275,9 +2331,11 @@ public class JByteByByteGenerator implements IGenerator {
 							+ penumRef.getPenum().getName() + ".toEnum("
 							+ rootClass + "Utility.getInteger(ba, ");
 				}
-				toString = toString.concat(className + "Enum."
-						+ handleCamelCase(penumRef.getName())
-						+ ".getOffsetInBits())));" + LINE_SEPARATOR);
+
+				toString = toString.concat(toFirstLower(grammarName)
+						+ "DirectoryInfoItems[" + handleCamelCase(className)
+						+ "_" + handleCamelCase(penumRef.getName())
+						+ "].getOffsetInBits())));" + LINE_SEPARATOR);
 			}
 		}
 
@@ -2340,6 +2398,20 @@ public class JByteByByteGenerator implements IGenerator {
 				+ "int length = directoryEntry.getLength();" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
+		toString = toString.concat(getPad() + "log4j.debug(\"id: \" + id);"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "log4j.debug(\"   offset: \" + offset);" + LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "log4j.debug(\"   length: \" + length);" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+
+		toString = toString.concat(getPad() + "if (length == 0) {"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad(1) + "continue;" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+
 		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : attributes) {
 			if (abstractAttribute instanceof Attribute) {
@@ -2372,9 +2444,9 @@ public class JByteByByteGenerator implements IGenerator {
 								.concat(getPad() + "else if (id == ");
 					}
 
-					toString = toString.concat(className + "Enum."
-							+ handleCamelCase(attribute.getName())
-							+ ".getId()) {" + LINE_SEPARATOR);
+					toString = toString.concat(handleCamelCase(className) + "_"
+							+ handleCamelCase(attribute.getName()) + ") {"
+							+ LINE_SEPARATOR);
 					if (attribute.getListOf() == null) {
 						toString = toString.concat(getPad(1)
 								+ toFirstLower(className) + ".set"
@@ -2442,8 +2514,8 @@ public class JByteByByteGenerator implements IGenerator {
 					toString = toString.concat(getPad() + "else if (id == ");
 				}
 
-				toString = toString.concat(className + "Enum."
-						+ handleCamelCase(subTypeRef.getName()) + ".getId()) {"
+				toString = toString.concat(handleCamelCase(className) + "_"
+						+ handleCamelCase(subTypeRef.getName()) + ") {"
 						+ LINE_SEPARATOR);
 				theLevel++;
 
@@ -2494,12 +2566,41 @@ public class JByteByByteGenerator implements IGenerator {
 			}
 		}
 
+		for (PEnumRef penumRef : penumRefs) {
+			if (penumRef.getOptional() != null) {
+				if (isFirst == true) {
+					toString = toString.concat(getPad() + "if (id == ");
+					isFirst = false;
+				} else {
+					toString = toString.concat(getPad() + "else if (id == ");
+				}
+
+				toString = toString.concat(handleCamelCase(className) + "_"
+						+ handleCamelCase(penumRef.getName()) + ") {"
+						+ LINE_SEPARATOR);
+				theLevel++;
+
+				// TODO for now, enums are stored as integers
+				toString = toString.concat(getPad() + "int ordinal = "
+						+ grammarName + "Utility.getInteger(ba,  offset);"
+						+ LINE_SEPARATOR);
+				toString = toString.concat(getPad() + toFirstLower(className)
+						+ ".set" + toFirstUpper(penumRef.getName()) + "("
+						+ penumRef.getPenum().getName() + ".toEnum(ordinal));"
+						+ LINE_SEPARATOR);
+
+				theLevel--;
+				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+			}
+		}
+
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ "log4j.debug(\"Leaving \" + METHOD);" + LINE_SEPARATOR);
+				+ "log4j.debug(\"Leaving \" + CLAZZ + METHOD);"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return "
 				+ toFirstLower(className) + ";" + LINE_SEPARATOR);
 		theLevel--;
@@ -2972,6 +3073,122 @@ public class JByteByByteGenerator implements IGenerator {
 		}
 	}
 
+	private String initializeDirectoryInfoItems(boolean isSubType,
+			List<AbstractAttribute> attributes, List<PEnumRef> penumRefs) {
+		final String METHOD = "initializeDirectoryInfoItems()";
+
+		String toString = getPad() + "// Initialize directory info items"
+				+ LINE_SEPARATOR;
+		toString = toString.concat(getPad() + "// Entered " + METHOD
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "private " + grammarName
+				+ "DirectoryInfoItem[] " + toFirstLower(grammarName)
+				+ "DirectoryInfoItems = new " + grammarName
+				+ "DirectoryInfoItem[] {" + LINE_SEPARATOR);
+
+		theLevel++;
+		int id = 0;
+
+		int offsetInBits = 0;
+		if (isSubType == false) {
+			// Reserve 2 bytes for the message ID.
+			offsetInBits = 16;
+		}
+
+		for (AbstractAttribute abstractAttribute : attributes) {
+			Attribute attribute = null;
+			SubTypeRef subTypeRef = null;
+			String name = null;
+			String attributeType = null;
+			int sizeInBits = 0;
+			boolean isDirectoryEntry = isDirectoryEntry(abstractAttribute);
+
+			if (abstractAttribute instanceof Attribute) {
+				attribute = (Attribute) abstractAttribute;
+				name = attribute.getName();
+				attributeType = attribute.getAttributeType().getLiteral();
+			} else if (abstractAttribute instanceof SubTypeRef) {
+				subTypeRef = (SubTypeRef) abstractAttribute;
+				name = subTypeRef.getName();
+				attributeType = subTypeRef.getSubType().getName();
+			}
+			sizeInBits = getPrimitiveSizeInBits(attributeType);
+
+			if (id != 0) {
+				toString = toString.concat("," + LINE_SEPARATOR
+						+ LINE_SEPARATOR);
+			}
+
+			if (isDirectoryEntry == false) {
+				toString = toString.concat(getPad() + "// sizeInBits: "
+						+ sizeInBits + LINE_SEPARATOR);
+			} else {
+				toString = toString
+						.concat(getPad()
+								+ "// This is a directory item. It's offset and length cannot be determined"
+								+ LINE_SEPARATOR);
+				toString = toString.concat(getPad() + "// until runtime."
+						+ LINE_SEPARATOR);
+			}
+			toString = toString.concat(getPad() + "new " + grammarName
+					+ "DirectoryInfoItem(" + id + ", \"" + name + "\", "
+					+ (isDirectoryEntry == false ? offsetInBits : -1) + ", 0, "
+					+ isDirectoryEntry + ")");
+
+			if (isDirectoryEntry == false) {
+				offsetInBits += sizeInBits;
+			}
+
+			id++;
+		}
+
+		for (PEnumRef penumRef : penumRefs) {
+			String name = penumRef.getName();
+			int sizeInBits = log2(penumRef.getPenum().getElements().size());
+			int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+			boolean isOptional = (penumRef.getOptional() != null);
+
+			if (id != 0) {
+				toString = toString.concat("," + LINE_SEPARATOR
+						+ LINE_SEPARATOR);
+			}
+
+			if (isOptional == false) {
+				toString = toString.concat(getPad() + "// sizeInBits: "
+						+ sizeInBits + LINE_SEPARATOR);
+				toString = toString.concat(getPad() + "// sizeInBytes: "
+						+ sizeInBytes + LINE_SEPARATOR);
+			} else {
+				toString = toString
+						.concat(getPad()
+								+ "// This is a directory item. It's offset and length cannot be determined"
+								+ LINE_SEPARATOR);
+				toString = toString.concat(getPad() + "// until runtime."
+						+ LINE_SEPARATOR);
+			}
+
+			toString = toString.concat(getPad() + "new " + grammarName
+					+ "DirectoryInfoItem(" + id + ", \"" + name + "\", "
+					+ (isOptional == false ? offsetInBits : -1) + ", 0, ");
+
+			if (isOptional == false) {
+				offsetInBits += sizeInBytes * 8;
+				toString = toString.concat("false)");
+			} else {
+				toString = toString.concat("true)");
+			}
+
+			id++;
+		}
+		theLevel--;
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "};" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "// Leaving " + METHOD
+				+ LINE_SEPARATOR);
+
+		return toString;
+	}
+
 	private void instantiateAbstractAttributes(String className,
 			String elementName, String attributeName, AbstractAttribute parent,
 			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs,
@@ -3430,9 +3647,8 @@ public class JByteByByteGenerator implements IGenerator {
 	private String instantiateSubTypeAttributes(SubType subType) {
 		final String METHOD = "instantiateSubTypeAttributes()";
 
-		instantiationString = "";
-		instantiationString = instantiationString.concat(getPad()
-				+ "// Entered " + METHOD + LINE_SEPARATOR);
+		instantiationString = getPad() + "// Entered " + METHOD
+				+ LINE_SEPARATOR;
 		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : subType.getAttributes()) {
 			if (abstractAttribute instanceof Attribute) {
@@ -4148,6 +4364,106 @@ public class JByteByByteGenerator implements IGenerator {
 				+ "// Leaving " + METHOD + LINE_SEPARATOR);
 	}
 
+	private String buildArrayOfDirectoryInfoItems(String className,
+			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs) {
+		final String METHOD = "buildArrayOfDirectoryInfoItems()";
+
+		String toString = getPad() + "// Entered " + METHOD + LINE_SEPARATOR;
+
+		for (AbstractAttribute abstractAttribute : attributes) {
+			if (abstractAttribute instanceof Attribute) {
+				Attribute attribute = (Attribute) abstractAttribute;
+				AttributeType primitiveType = attribute.getAttributeType();
+				boolean isList = attribute.getListOf() != null;
+
+				if (isDirectoryEntry(abstractAttribute) == true) {
+					/*
+					 * By default, build the method that gets the length of the
+					 * attribute if the attribute is a string, otherwise use the
+					 * length of the primitive type.
+					 */
+					String getter = "this.get"
+							+ toFirstUpper(attribute.getName()) + "()";
+					String getLengthString = getter + " != null ? " + getter
+							+ "." + (isList == false ? "length" : "size")
+							+ "() : 0";
+
+					/*
+					 * Handle optional primitives that aren't in lists and
+					 * aren't strings.
+					 */
+					if (isList == false
+							&& primitiveType != AttributeType.STRING) {
+						getLengthString = getPrimitiveSize(primitiveType
+								.getLiteral());
+					}
+
+					toString = toString.concat(getPad()
+							+ toFirstLower(grammarName) + "DirectoryInfoItems["
+							+ handleCamelCase(className) + "_"
+							+ handleCamelCase(attribute.getName())
+							+ "].setLength(" + getLengthString + ");"
+							+ LINE_SEPARATOR);
+				}
+			} else if (abstractAttribute instanceof SubTypeRef) {
+				SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
+				boolean isList = subTypeRef.getListOf() != null;
+				boolean isSelfReference = false;
+				boolean isOptional = subTypeRef.getOptional() != null;
+
+				if (toFirstUpper(subTypeRef.getSubType().getName()).equals(
+						className) == true
+						&& isList == false) {
+					isSelfReference = true;
+					toString = toString.concat(getPad()
+							+ "// Ignoring self-reference: "
+							+ subTypeRef.getName() + LINE_SEPARATOR);
+				}
+
+				String getLengthString = "this.get"
+						+ toFirstUpper(subTypeRef.getName())
+						+ "()."
+						+ (isList == false ? "get"
+								+ toFirstUpper(subTypeRef.getSubType()
+										.getName()) + "Size()" : "size()");
+
+				if (isSelfReference) {
+					toString = toString.concat(getPad()
+							+ "// Set self-references to length 0"
+							+ LINE_SEPARATOR);
+					toString = toString.concat(getPad()
+							+ toFirstLower(grammarName) + "DirectoryInfoItems["
+							+ handleCamelCase(className) + "_"
+							+ handleCamelCase(subTypeRef.getName())
+							+ "].setLength(0);" + LINE_SEPARATOR);
+				} else {
+					toString = toString.concat(getPad()
+							+ toFirstLower(grammarName) + "DirectoryInfoItems["
+							+ handleCamelCase(className) + "_"
+							+ handleCamelCase(subTypeRef.getName())
+							+ "].setLength(" + "this.get"
+							+ toFirstUpper(subTypeRef.getName())
+							+ "() != null ? " + getLengthString + " : 0);"
+							+ LINE_SEPARATOR);
+				}
+			}
+		}
+
+		for (PEnumRef penumRef : penumRefs) {
+			// TODO store enums as integers for now
+			if (penumRef.getOptional() != null) {
+				toString = toString.concat(getPad() + toFirstLower(grammarName)
+						+ "DirectoryInfoItems[" + handleCamelCase(className)
+						+ "_" + handleCamelCase(penumRef.getName())
+						+ "].setLength(4);" + LINE_SEPARATOR);
+			}
+		}
+
+		toString = toString.concat(getPad() + "// Leaving " + METHOD
+				+ LINE_SEPARATOR);
+		return toString;
+	}
+
 	private String instantiatePEnumRef(String className, PEnumRef penumRef,
 			boolean isFirst) {
 		final String METHOD = "instantiatePEnumRef()";
@@ -4589,7 +4905,7 @@ public class JByteByByteGenerator implements IGenerator {
 	}
 
 	private void initAttributeValue(String className, Attribute attribute,
-			String name, boolean isList) {
+			boolean isList) {
 		attributeInitString = attributeInitString.concat(getPad()
 				+ "// Entered initAttributeValue()" + LINE_SEPARATOR);
 		String key = attribute.getName();
@@ -4987,14 +5303,14 @@ public class JByteByByteGenerator implements IGenerator {
 								+ ") {" + LINE_SEPARATOR);
 				theLevel++;
 
-				initAttributeValue(className, attribute, name, isList);
+				initAttributeValue(className, attribute, isList);
 				attributeInitString = attributeInitString.concat(getPad()
 						+ attribute.getName() + "Index++;" + LINE_SEPARATOR);
 				theLevel--;
 				attributeInitString = attributeInitString.concat(getPad() + "}"
 						+ LINE_SEPARATOR);
 			} else {
-				initAttributeValue(className, attribute, name, isList);
+				initAttributeValue(className, attribute, isList);
 			}
 		} else if (abstractAttribute instanceof SubTypeRef) {
 			SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
@@ -5172,6 +5488,132 @@ public class JByteByByteGenerator implements IGenerator {
 		return toString;
 	}
 
+	private String generateDirectoryInfoItemClass(String packageName,
+			String className) {
+		theLevel = 0;
+		String toString = "";
+		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ " * WARNING: This file was generated by JByteByByteGenerator.java (see"
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * generateClassFile())."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * Do not edit."
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "*/" + LINE_SEPARATOR);
+		toString = toString.concat("package " + packageName + ";"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
+		toString = toString
+				.concat(" * The"
+						+ className
+						+ " class contains information used to build a directory entry."
+						+ LINE_SEPARATOR);
+
+		toString = toString
+				.concat(getPad()
+						+ " * Directory entries contain information used to pack and unpack attributes of messages and SubTypes"
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * defined by the "
+				+ grammarName + "  grammar." + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "*/" + LINE_SEPARATOR);
+		toString = toString.concat("public class " + className + " {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "private final int id;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "private final String name;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "private final int offsetInBits;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "private int length;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "private boolean isDirectoryEntry;" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "public "
+						+ className
+						+ "(int id, String name, int offsetInBits, int length, boolean isDirectoryEntry) {"
+						+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "this.id = id;" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "this.name = name;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "this.offsetInBits = offsetInBits;" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "this.length = length;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "this.setDirectoryEntry(isDirectoryEntry);" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "public int getId() {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "return this.id;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "public String getName() {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "return this.name;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "public int getOffsetInBits() {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "return this.offsetInBits;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "public int getLength() {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "return this.length;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "public void setLength(int length) {" + LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "this.length = length;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "public boolean isDirectoryEntry() {" + LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad() + "return isDirectoryEntry;"
+				+ LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "public void setDirectoryEntry(boolean isDirectoryEntry) {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		toString = toString.concat(getPad()
+				+ "this.isDirectoryEntry = isDirectoryEntry;" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+
+		return toString;
+	}
+
 	private String generateDirectoryEntryClass(String packageName,
 			String className) {
 		theLevel = 0;
@@ -5188,7 +5630,7 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat("/**" + LINE_SEPARATOR);
-		toString = toString.concat(" * The" + className
+		toString = toString.concat(" * The " + className
 				+ " class defines a directory entry." + LINE_SEPARATOR);
 		toString = toString.concat(" */" + LINE_SEPARATOR);
 		toString = toString.concat("public class " + className + " {"
@@ -5258,8 +5700,51 @@ public class JByteByByteGenerator implements IGenerator {
 	}
 
 	/*
+	 * This method builds a constant ID for each message attribute.
+	 */
+	private String buildAttributeIDs(String className,
+			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs) {
+		final String METHOD = "buildAttributeIDs()";
+		String toString = getPad() + "// Entered " + METHOD + LINE_SEPARATOR;
+
+		int id = 0;
+
+		for (AbstractAttribute abstractAttribute : attributes) {
+			Attribute attribute = null;
+			SubTypeRef subTypeRef = null;
+			String name = null;
+
+			if (abstractAttribute instanceof Attribute) {
+				attribute = (Attribute) abstractAttribute;
+				name = attribute.getName();
+			} else if (abstractAttribute instanceof SubTypeRef) {
+				subTypeRef = (SubTypeRef) abstractAttribute;
+				name = subTypeRef.getName();
+			}
+
+			toString = toString.concat(getPad() + "private static final int "
+					+ handleCamelCase(className) + "_" + handleCamelCase(name)
+					+ " = " + id + ";" + LINE_SEPARATOR);
+			id++;
+		}
+
+		for (PEnumRef penumRef : penumRefs) {
+			String name = penumRef.getName();
+			toString = toString.concat(getPad() + "private static final int "
+					+ handleCamelCase(className) + "_" + handleCamelCase(name)
+					+ " = " + id + ";" + LINE_SEPARATOR);
+			id++;
+		}
+
+		toString = toString.concat(getPad() + "// Leaving " + METHOD
+				+ LINE_SEPARATOR);
+
+		return toString;
+	}
+
+	/*
 	 * This method builds an enumeration that stores information about each
-	 * instance variable that is need for packing and unpacking.
+	 * instance variable that is needed for packing and unpacking.
 	 */
 	private String buildClassEnum(String className, boolean isSubType,
 			EList<AbstractAttribute> attributes, EList<PEnumRef> penumRefs) {
@@ -5316,7 +5801,7 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 			}
 			toString = toString.concat(getPad() + handleCamelCase(name) + "("
-					+ id + ", "
+					+ id + ", \"" + name + "\", "
 					+ (isDirectoryEntry == false ? offsetInBits : -1) + ", 0, "
 					+ isDirectoryEntry + ")");
 
@@ -5352,8 +5837,8 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 			}
 			toString = toString.concat(getPad() + handleCamelCase(name) + "("
-					+ id + ", " + (isOptional == false ? offsetInBits : -1)
-					+ ", 0, ");
+					+ id + ", \"" + name + "\", "
+					+ (isOptional == false ? offsetInBits : -1) + ", 0, ");
 
 			if (isOptional == false) {
 				offsetInBits += sizeInBytes * 8;
@@ -5370,6 +5855,8 @@ public class JByteByByteGenerator implements IGenerator {
 
 		toString = toString.concat(getPad() + "private final int id;"
 				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "private final String name;"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "private final int offsetInBits;"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "private int length;"
@@ -5381,10 +5868,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString
 				.concat(getPad()
 						+ className
-						+ "Enum(int id, int offsetInBits, int length, boolean isDirectoryEntry) {"
+						+ "Enum(int id, String name, int offsetInBits, int length, boolean isDirectoryEntry) {"
 						+ LINE_SEPARATOR);
 		theLevel++;
 		toString = toString.concat(getPad() + "this.id = id;" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "this.name = name;"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "this.offsetInBits = offsetInBits;" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "this.length = length;"
@@ -5398,6 +5887,13 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "public int getId() {"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad(1) + "return this.id;"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
+
+		toString = toString.concat(getPad() + "public String getName() {"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad(1) + "return this.name;"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
@@ -5425,7 +5921,8 @@ public class JByteByByteGenerator implements IGenerator {
 		theLevel--;
 		toString = toString.concat(getPad() + "}");
 
-		toString = toString.concat(" // Leaving " + METHOD + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "// Leaving " + METHOD
+				+ LINE_SEPARATOR);
 
 		return toString;
 	}
@@ -5705,8 +6202,8 @@ public class JByteByByteGenerator implements IGenerator {
 				.concat(getPad()
 						+ " * This method returns a string from a byte array given an offset"
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ " * in the byte array and a length." + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + " * and a length."
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -5733,10 +6230,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a boolean from a byte array given an offset in bits"
+						+ " * This method returns a boolean from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -5845,10 +6340,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a character from a byte array given an offset in bits"
+						+ " * This method returns a character from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -5878,10 +6371,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a short from a byte array given an offset in bits"
+						+ " * This method returns a short from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -5911,10 +6402,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns an integer from a byte array given an offset in bits"
+						+ " * This method returns an integer from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -6009,10 +6498,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a Calendar from a byte array given an offset in bits"
+						+ " * This method returns a Calendar from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -6039,10 +6526,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a date from a byte array given an offset"
+						+ " * This method returns a date from a byte array given an offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "public static Date getDate(byte[] byteArray, int offset) {"
@@ -6062,10 +6547,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a double from a byte array given an offset in bits"
+						+ " * This method returns a double from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
@@ -6097,15 +6580,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a bit field into a byte array at a given offset in bits"
+						+ " * This method inserts a bit field into a byte array at a given offset in bits."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bits in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bits." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param length The length of the bit field in bits."
 				+ LINE_SEPARATOR);
@@ -6191,15 +6671,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a calendar into a byte array at a given offset"
+						+ " * This method inserts a calendar into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param calendar The calendar to be inserted."
 				+ LINE_SEPARATOR);
@@ -6228,15 +6705,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a date into a byte array at a given offset"
+						+ " * This method inserts a date into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param date The date to be inserted." + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * @return The byte array."
@@ -6264,15 +6738,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of calendars into a byte array at a given offset"
+						+ " * This method inserts a list of calendars into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param calendars The list of calendars to be inserted."
 				+ LINE_SEPARATOR);
@@ -6308,15 +6779,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a byte into a byte array at a given offset"
+						+ " * This method inserts a byte into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad() + " * @param b The byte value to be inserted."
 						+ LINE_SEPARATOR);
@@ -6346,15 +6814,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of bytes into a byte array at a given offset"
+						+ " * This method inserts a list of bytes into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param bytes The bytes to be inserted." + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * @return The byte array."
@@ -6384,15 +6849,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts an array of bytes into a byte array at a given offset"
+						+ " * This method inserts an array of bytes into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param bytes The bytes to be inserted." + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * @return The byte array."
@@ -6425,15 +6887,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a Boolean into a byte array at a given offset"
+						+ " * This method inserts a Boolean into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param b The Boolean value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6464,15 +6923,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of booleans into a byte array at a given offset"
+						+ " * This method inserts a list of booleans into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
 						+ " * @param booleans The list of boolean values to be inserted."
@@ -6509,15 +6965,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a double into a byte array at a given offset"
+						+ " * This method inserts a double into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param d The double value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6546,15 +6999,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of doubles into a byte array at a given offset"
+						+ " * This method inserts a list of doubles into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param doubles The list of double values to be inserted."
 				+ LINE_SEPARATOR);
@@ -6589,15 +7039,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a long into a byte array at a given offset"
+						+ " * This method inserts a long into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param lng The long value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6627,15 +7074,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of longs into a byte array at a given offset"
+						+ " * This method inserts a list of longs into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param longs The list of long values to be inserted."
 				+ LINE_SEPARATOR);
@@ -6670,15 +7114,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts an integer into a byte array at a given offset"
+						+ " * This method inserts an integer into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param integer The integer value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6709,15 +7150,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of integers into a byte array at a given offset"
+						+ " * This method inserts a list of integers into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
 						+ " * @param integers The list of integer values to be inserted."
@@ -6754,15 +7192,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a short into a byte array at a given offset"
+						+ " * This method inserts a short into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param shrt The short value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6793,15 +7228,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of shorts into a byte array at a given offset"
+						+ " * This method inserts a list of shorts into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param shorts The list of short values to be inserted."
 				+ LINE_SEPARATOR);
@@ -6837,15 +7269,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a float into a byte array at a given offset"
+						+ " * This method inserts a float into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param flt The float value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6876,15 +7305,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of floats into a byte array at a given offset"
+						+ " * This method inserts a list of floats into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param floats The list of float values to be inserted."
 				+ LINE_SEPARATOR);
@@ -6919,15 +7345,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a char into a byte array at a given offset"
+						+ " * This method inserts a char into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param c The integer value to be inserted."
 				+ LINE_SEPARATOR);
@@ -6962,15 +7385,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of chars into a byte array at a given offset"
+						+ " * This method inserts a list of chars into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param chars The list of char values to be inserted."
 				+ LINE_SEPARATOR);
@@ -7006,15 +7426,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a string into a byte array at a given an offset"
+						+ " * This method inserts a string into a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param string The string to be inserted."
 				+ LINE_SEPARATOR);
@@ -7052,15 +7469,12 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method inserts a list of strings into a byte array at a given an offset"
+						+ " * This method inserts a list of strings into a byte array at a given an offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param byteArray The byte array." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * @param offset The offset in bytes in the byte array."
-				+ LINE_SEPARATOR);
+				+ " * @param offset The offset in bytes." + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ " * @param strings The list of string to be inserted."
 				+ LINE_SEPARATOR);
@@ -7096,10 +7510,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method sets a byte in a byte array at a certain offset"
+						+ " * This method sets a byte in a byte array at a given offset."
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + " * in the byte array."
-				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " * @return The byte array."
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
@@ -7922,11 +8334,11 @@ public class JByteByByteGenerator implements IGenerator {
 				+ "log4j.debug(String.format(\"id: %d\", id));"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
-		
+
 		toString = toString.concat(getPad() + "" + toFirstLower(rootClass)
 				+ "Enum = " + rootClass + "Enum.toEnum(id);" + LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "if (" + toFirstLower(rootClass) + "Enum != null) {"
-				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "if (" + toFirstLower(rootClass)
+				+ "Enum != null) {" + LINE_SEPARATOR);
 		theLevel++;
 		toString = toString.concat(getPad()
 				+ "log4j.debug(String.format(\"ID: %d (%s)\", "
@@ -8144,6 +8556,10 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		theLevel++;
 
+		toString = toString.concat(getPad()
+				+ "private static final String CLAZZ = \"" + className + "\";"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "private static final int ID = "
 				+ rootClass + "Enum." + handleCamelCase(className)
 				+ ".getId();" + LINE_SEPARATOR);
@@ -8164,7 +8580,11 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
-		toString = toString.concat(getPad() + "private static " + rootClass
+		toString = toString.concat(initializeDirectoryInfoItems(isSubType,
+				attributes, penumRefs));
+		toString = toString.concat(LINE_SEPARATOR);
+
+		toString = toString.concat(getPad() + "private " + rootClass
 				+ "DirectoryEntry[] theDirectory;" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "private static final int DIRECTORY_OFFSET = "
@@ -8186,10 +8606,13 @@ public class JByteByByteGenerator implements IGenerator {
 
 		if (attributes.size() != 0 || penumRefs.size() != 0) {
 			toString = toString.concat(LINE_SEPARATOR);
-			toString = toString.concat(buildClassEnum(className, isSubType,
-					attributes, penumRefs));
+			toString = toString.concat(getPad() + "// The attribute IDs."
+					+ LINE_SEPARATOR);
+			toString = toString.concat(buildAttributeIDs(className, attributes,
+					penumRefs));
 
 			toString = toString.concat(LINE_SEPARATOR);
+
 			toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 			toString = toString.concat(getPad() + " * The instance variables."
 					+ LINE_SEPARATOR);
@@ -8574,9 +8997,11 @@ public class JByteByByteGenerator implements IGenerator {
 					 */
 					if (isList == true && primitiveType == AttributeType.STRING) {
 						toString = toString.concat(getPad()
-								+ "directorySize += get"
+								+ "directorySize += (get"
 								+ toFirstUpper(attribute.getName())
-								+ "().size();" + LINE_SEPARATOR);
+								+ "().size() == 0 ? 1 : get"
+								+ toFirstUpper(attribute.getName())
+								+ "().size());" + LINE_SEPARATOR);
 					} else {
 						toString = toString.concat(getPad()
 								+ "directorySize++;" + LINE_SEPARATOR);
@@ -8592,9 +9017,11 @@ public class JByteByByteGenerator implements IGenerator {
 							+ LINE_SEPARATOR);
 				} else {
 					toString = toString.concat(getPad()
-							+ "directorySize += get"
-							+ toFirstUpper(subTypeRef.getName()) + "().size();"
-							+ LINE_SEPARATOR);
+							+ "directorySize += (get"
+							+ toFirstUpper(subTypeRef.getName())
+							+ "().size() == 0 ? 1 : get"
+							+ toFirstUpper(subTypeRef.getName())
+							+ "().size());" + LINE_SEPARATOR);
 				}
 			}
 		}
@@ -8629,114 +9056,320 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "public int get" + className
 				+ "Size() {" + LINE_SEPARATOR);
 		theLevel++;
+
+		toString = toString.concat(getPad() + "final String METHOD = \"get"
+				+ className + "Size()\";" + LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "log4j.debug(\"Entered \" + METHOD);" + LINE_SEPARATOR);
+
+		String sizeVariable = "_" + toFirstLower(className) + "Size";
+		toString = toString.concat(getPad() + "int " + sizeVariable + " = 0;"
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "int size = 0;" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
-		toString = toString.concat(getPad() + "int directorySize = get"
-				+ className + "DirectorySize();" + LINE_SEPARATOR);
+		boolean isDirectory = false;
+		for (AbstractAttribute abstractAttribute : attributes) {
+			if (isDirectoryEntry(abstractAttribute) == true) {
+				isDirectory = true;
+				break;
+			}
+		}
 
-		toString = toString.concat(getPad() + "size += directorySize * "
-				+ rootClass + "DirectoryEntry.DIRECTORY_ENTRY_SIZE_IN_BYTES;"
+		toString = toString.concat(getPad() + "// isDirectory = " + isDirectory
 				+ LINE_SEPARATOR);
+
+		if (isDirectory) {
+			toString = toString.concat(getPad() + "int directorySize = get"
+					+ className + "DirectorySize();" + LINE_SEPARATOR);
+			toString = toString.concat(getPad() + sizeVariable
+					+ " = DIRECTORY_OFFSET;" + LINE_SEPARATOR);
+			toString = toString.concat(getPad() + sizeVariable
+					+ " += directorySize * " + rootClass
+					+ "DirectoryEntry.DIRECTORY_ENTRY_SIZE_IN_BYTES;"
+					+ LINE_SEPARATOR);
+
+			for (AbstractAttribute abstractAttribute : attributes) {
+				if (abstractAttribute instanceof Attribute) {
+					Attribute attribute = (Attribute) abstractAttribute;
+					AttributeType primitiveType = attribute.getAttributeType();
+					boolean isList = attribute.getListOf() != null;
+
+					if (isDirectoryEntry(abstractAttribute) == true) {
+						toString = toString.concat(getPad() + "// "
+								+ attribute.getName()
+								+ (isList == true ? " is a list" : "")
+								+ LINE_SEPARATOR);
+
+						if (isList == false) {
+							String getLengthString;
+							/*
+							 * By default, build the method that gets the length
+							 * of the attribute if the attribute is a string,
+							 * otherwise use the length of the primitive type.
+							 */
+							if (primitiveType == AttributeType.STRING) {
+								String getter = "this.get"
+										+ toFirstUpper(attribute.getName())
+										+ "()";
+								getLengthString = getter + " != null ? "
+										+ getter + ".length() : 0";
+							} else {
+								/*
+								 * Handle optional primitives that aren't
+								 * strings.
+								 */
+								getLengthString = getPrimitiveSize(primitiveType
+										.getLiteral());
+							}
+
+							toString = toString.concat(getPad() + "size = "
+									+ getLengthString + ";" + LINE_SEPARATOR);
+							toString = toString
+									.concat(getPad()
+											+ "log4j.debug(String.format(\" %s size: %d\", \""
+											+ attribute.getName()
+											+ "\", size));" + LINE_SEPARATOR);
+							toString = toString.concat(getPad() + sizeVariable
+									+ " += size;" + LINE_SEPARATOR);
+						} else {
+							/*
+							 * Handle lists of strings
+							 */
+							if (primitiveType == AttributeType.STRING) {
+								toString = toString.concat(getPad()
+										+ "if (this.get"
+										+ toFirstUpper(attribute.getName())
+										+ "().size() != 0) {" + LINE_SEPARATOR);
+								theLevel++;
+								toString = toString.concat(getPad()
+										+ "for (String " + attribute.getName()
+										+ " : this.get"
+										+ toFirstUpper(attribute.getName())
+										+ "()) {" + LINE_SEPARATOR);
+								theLevel++;
+
+								toString = toString.concat(getPad() + "size = "
+										+ attribute.getName() + ".length();"
+										+ LINE_SEPARATOR);
+								toString = toString
+										.concat(getPad()
+												+ "log4j.debug(String.format(\" %s size: %d\", \""
+												+ attribute.getName()
+												+ "\", size));"
+												+ LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ sizeVariable + " += size;"
+										+ LINE_SEPARATOR);
+
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+							} else {
+								/*
+								 * Handle lists of primitives
+								 */toString = toString.concat(getPad() + "if ("
+										+ attribute.getName() + " != null && "
+										+ attribute.getName()
+										+ ".size() != 0) {" + LINE_SEPARATOR);
+								theLevel++;
+
+								toString = toString
+										.concat(getPad()
+												+ "// size: "
+												+ attribute.getName()
+												+ ".size() * "
+												+ getPrimitiveSize(primitiveType
+														.getLiteral())
+												+ LINE_SEPARATOR);
+
+								toString = toString.concat(getPad()
+										+ "size = "
+										+ attribute.getName()
+										+ ".size() * "
+										+ getPrimitiveSize(primitiveType
+												.getLiteral()) + ";"
+										+ LINE_SEPARATOR);
+								toString = toString
+										.concat(getPad()
+												+ "log4j.debug(String.format(\" %s size: %d\", \""
+												+ attribute.getName()
+												+ "\", size));"
+												+ LINE_SEPARATOR);
+								toString = toString.concat(getPad()
+										+ sizeVariable + " += size;"
+										+ LINE_SEPARATOR);
+
+								theLevel--;
+								toString = toString.concat(getPad() + "}"
+										+ LINE_SEPARATOR);
+							}
+						}
+					}
+				} else if (abstractAttribute instanceof SubTypeRef) {
+					SubTypeRef subTypeRef = (SubTypeRef) abstractAttribute;
+					boolean isList = subTypeRef.getListOf() != null;
+					toString = toString.concat(getPad() + "// isList: "
+							+ isList + LINE_SEPARATOR);
+
+					if (toFirstUpper(subTypeRef.getSubType().getName()).equals(
+							className) == true
+							&& isList == false) {
+						toString = toString.concat(getPad()
+								+ "// Ignoring self-reference: "
+								+ subTypeRef.getName() + LINE_SEPARATOR);
+					} else {
+						toString = toString.concat(getPad() + "// "
+								+ subTypeRef.getName() + LINE_SEPARATOR);
+						if (isList == false) {
+							toString = toString.concat(getPad()
+									+ "size = this.get"
+									+ toFirstUpper(subTypeRef.getName())
+									+ "() != null ? this.get"
+									+ toFirstUpper(subTypeRef.getName())
+									+ "().get"
+									+ toFirstUpper(subTypeRef.getSubType()
+											.getName()) + "Size() : 0;"
+									+ LINE_SEPARATOR);
+							toString = toString
+									.concat(getPad()
+											+ "log4j.debug(String.format(\" %s size: %d\", \""
+											+ subTypeRef.getSubType().getName()
+											+ "\", size));" + LINE_SEPARATOR);
+							toString = toString.concat(getPad() + sizeVariable
+									+ " += size;" + LINE_SEPARATOR);
+						} else {
+							toString = toString.concat(getPad()
+									+ "if (this.get"
+									+ toFirstUpper(subTypeRef.getName())
+									+ "().size() != 0) {" + LINE_SEPARATOR);
+							theLevel++;
+							toString = toString.concat(getPad() + "for ("
+									+ subTypeRef.getSubType().getName() + " "
+									+ subTypeRef.getName()
+									+ subTypeRef.getSubType().getName()
+									+ " : this.get"
+									+ toFirstUpper(subTypeRef.getName())
+									+ "()) {" + LINE_SEPARATOR);
+
+							toString = toString.concat(getPad(1) + "size = "
+									+ subTypeRef.getName()
+									+ subTypeRef.getSubType().getName()
+									+ ".get"
+									+ subTypeRef.getSubType().getName()
+									+ "Size();" + LINE_SEPARATOR);
+							toString = toString
+									.concat(getPad(1)
+											+ "log4j.debug(String.format(\" %s size: %d\", \""
+											+ subTypeRef.getSubType().getName()
+											+ "\", size));" + LINE_SEPARATOR);
+							toString = toString.concat(getPad(1) + sizeVariable
+									+ " += size;" + LINE_SEPARATOR);
+							toString = toString.concat(getPad() + "}"
+									+ LINE_SEPARATOR);
+							theLevel--;
+
+							toString = toString.concat(getPad() + "}"
+									+ LINE_SEPARATOR);
+						}
+					}
+				}
+			}
+
+			for (PEnumRef penumRef : penumRefs) {
+				// TODO for now, enums are stored in an integer
+				toString = toString.concat(getPad() + "// "
+						+ penumRef.getName() + ";" + LINE_SEPARATOR);
+				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+				sizeInBytes = 4;
+
+				toString = toString.concat(getPad() + "size = " + sizeInBytes
+						+ ";" + LINE_SEPARATOR);
+				toString = toString.concat(getPad()
+						+ "log4j.debug(String.format(\" %s size: %d\", \""
+						+ penumRef.getName() + "\", size));" + LINE_SEPARATOR);
+				toString = toString.concat(getPad() + sizeVariable
+						+ " += size;" + LINE_SEPARATOR);
+			}
+		} else {
+			toString = toString.concat(getPad() + sizeVariable + " = 0;"
+					+ LINE_SEPARATOR);
+
+			for (AbstractAttribute abstractAttribute : attributes) {
+				if (abstractAttribute instanceof Attribute) {
+					Attribute attribute = (Attribute) abstractAttribute;
+					AttributeType attributeType = attribute.getAttributeType();
+					String primitiveType = attributeType.getLiteral();
+					String typeName = toFirstUpper(primitiveType
+							.equals(AttributeType.CHAR.toString()) ? "Character"
+							: attribute.getAttributeType().getLiteral());
+					boolean isOptional = (attribute.getOptional() != null);
+
+					if (isDirectoryEntry(abstractAttribute) == false) {
+						if (isOptional == false) {
+							toString = toString.concat(getPad()
+									+ "if (this.get"
+									+ toFirstUpper(attribute.getName())
+									+ "() != null) {" + LINE_SEPARATOR);
+							theLevel++;
+						}
+
+						toString = toString.concat(getPad() + "// "
+								+ attribute.getName() + LINE_SEPARATOR);
+
+						if (attributeType == AttributeType.BOOLEAN) {
+							toString = toString.concat(getPad() + sizeVariable
+									+ " += 1;" + LINE_SEPARATOR);
+						} else if (attributeType == AttributeType.BYTE) {
+							toString = toString.concat(getPad() + sizeVariable
+									+ " += 1;" + LINE_SEPARATOR);
+						} else {
+							toString = toString.concat(getPad() + sizeVariable
+									+ " += " + getPrimitiveSize(primitiveType)
+									+ ";" + LINE_SEPARATOR);
+						}
+						theLevel--;
+						toString = toString.concat(getPad() + "}"
+								+ LINE_SEPARATOR);
+
+						toString = toString.concat(LINE_SEPARATOR);
+					}
+				}
+			}
+
+			for (PEnumRef penumRef : penumRefs) {
+				toString = toString.concat(getPad() + "// "
+						+ penumRef.getName() + ";" + LINE_SEPARATOR);
+				boolean isOptional = (penumRef.getOptional() != null);
+				if (isOptional == false) {
+					int sizeInBytes = log8(penumRef.getPenum().getElements()
+							.size());
+
+					toString = toString.concat(getPad() + sizeVariable + " += "
+							+ sizeInBytes + ";" + LINE_SEPARATOR);
+				}
+			}
+		}
 
 		if (isSubType == false) {
 			toString = toString.concat(getPad() + "// Add two bytes for the ID"
 					+ LINE_SEPARATOR);
-			toString = toString
-					.concat(getPad() + "size += 2;" + LINE_SEPARATOR);
+			toString = toString.concat(getPad() + sizeVariable + " += 2;"
+					+ LINE_SEPARATOR);
 			toString = toString.concat(getPad()
 					+ "// Add eight bytes for the CRC" + LINE_SEPARATOR);
-			toString = toString
-					.concat(getPad() + "size += 8;" + LINE_SEPARATOR);
-		}
-
-		for (Attribute attribute : listOfAttributes) {
-			toString = toString.concat(getPad() + "// Add size of "
-					+ attribute.getName() + LINE_SEPARATOR);
-			if (attribute.getListOf() != null) {
-				/*
-				 * Add the lengths of all the strings.
-				 */
-				if (attribute.getAttributeType() == AttributeType.STRING) {
-					String s1 = toFirstUpper(attribute.getAttributeType()
-							.getLiteral());
-					String s2 = attribute.getAttributeType().getLiteral()
-							.substring(0, 1);
-					String s3 = toFirstUpper(attribute.getName());
-
-					toString = toString.concat(String.format(getPad()
-							+ "for (%s %s : get%s()) {\n", s1, s2, s3));
-					theLevel++;
-					toString = toString.concat(getPad()
-							+ "size += "
-							+ attribute.getAttributeType().getLiteral()
-									.substring(0, 1)
-							+ ".getBytes(Charset.forName(\"UTF-8\")).length;"
-							+ LINE_SEPARATOR);
-					theLevel--;
-					toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
-				} else {
-					toString = toString.concat(getPad()
-							+ "size += "
-							+ getPrimitiveSize(attribute.getAttributeType()
-									.getLiteral()) + " * get"
-							+ toFirstUpper(attribute.getName()) + "().size();"
-							+ LINE_SEPARATOR);
-				}
-			} else {
-				if (attribute.getAttributeType() == AttributeType.STRING) {
-					String getter = "get" + toFirstUpper(attribute.getName())
-							+ "()";
-
-					toString = toString.concat(getPad() + "size += (" + getter
-							+ " != null ? get"
-							+ toFirstUpper(attribute.getName())
-							+ "().length() : 0);" + LINE_SEPARATOR);
-				} else {
-					toString = toString.concat(getPad()
-							+ "size += "
-							+ getPrimitiveSize(attribute.getAttributeType()
-									.getLiteral()) + ";" + LINE_SEPARATOR);
-				}
-			}
-		}
-
-		for (SubTypeRef subTypeRef : listOfSubTypes) {
-			toString = toString.concat(getPad() + "// Add size of "
-					+ subTypeRef.getName() + LINE_SEPARATOR);
-			if (subTypeRef.getListOf() != null) {
-				toString = toString.concat(getPad() + "for ("
-						+ toFirstUpper(subTypeRef.getSubType().getName()) + " "
-						+ toFirstLower(subTypeRef.getSubType().getName())
-						+ ": get" + toFirstUpper(subTypeRef.getName())
-						+ "()) {" + LINE_SEPARATOR);
-				theLevel++;
-				toString = toString.concat(getPad() + "size += "
-						+ toFirstLower(subTypeRef.getSubType().getName())
-						+ ".get"
-						+ toFirstUpper(subTypeRef.getSubType().getName())
-						+ "Size();" + LINE_SEPARATOR);
-				theLevel--;
-				toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
-			} else {
-				toString = toString.concat(getPad() + "size += get"
-						+ toFirstUpper(subTypeRef.getName()) + "().get"
-						+ toFirstUpper(subTypeRef.getSubType().getName())
-						+ "Size();" + LINE_SEPARATOR);
-			}
-		}
-
-		for (PEnumRef penumRef : penumRefs) {
-			toString = toString.concat(getPad() + "// Add size of "
-					+ penumRef.getName() + LINE_SEPARATOR);
-
-			int sizeInBytes = log8(penumRef.getPenum().getElements().size());
-			toString = toString.concat(getPad() + "size += " + sizeInBytes
-					+ ";" + LINE_SEPARATOR);
+			toString = toString.concat(getPad() + sizeVariable + " += 8;"
+					+ LINE_SEPARATOR);
 		}
 
 		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "return size;" + LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "log4j.debug(\"Leaving \" + METHOD);" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "return " + sizeVariable + ";"
+				+ LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 

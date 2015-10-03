@@ -20,7 +20,6 @@
  */
 package com.viacron.utils.bbb.validation;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
