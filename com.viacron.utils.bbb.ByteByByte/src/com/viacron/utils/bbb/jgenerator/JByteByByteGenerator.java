@@ -1,23 +1,3 @@
-/*
- * File: JByteByByteGenerator.java
- * Description: The Java generator for the ByteByByte DSL.
- * 
- * Copyright (C) 2015  Scott Ritchie
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
 package com.viacron.utils.bbb.jgenerator;
 
 import java.util.ArrayList;
@@ -44,16 +24,8 @@ import com.viacron.utils.bbb.byteByByte.RootClass;
 import com.viacron.utils.bbb.byteByByte.SubType;
 import com.viacron.utils.bbb.byteByByte.SubTypeRef;
 
-/**
- * This class generates java classes for packing and unpacking models that
- * conform to the ByteByByte grammar into or from byte arrays and strings.
- * 
- * @author Scott Ritchie
- * 
- * @history sritchie Mar 28, 2015 : Initial creation.
- * 
- */
 public class JByteByByteGenerator implements IGenerator {
+
 	private static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	private static final String INDENTATION_STRING = "   ";
 	private static final String LINE_SEPARATOR = System
@@ -80,7 +52,6 @@ public class JByteByByteGenerator implements IGenerator {
 
 	private boolean isDebug = false;
 
-	@Override
 	public void doGenerate(Resource resource, IFileSystemAccess fsa) {
 		String className = "";
 		String penumName = "";
@@ -941,8 +912,9 @@ public class JByteByByteGenerator implements IGenerator {
 
 		for (PEnumRef penumRef : penumRefs) {
 			if (penumRef.getOptional() == null) {
-				offsetInBits += log8(penumRef.getPenum().getElements().size());
-				// offsetInBits += 32;
+				// offsetInBits +=
+				// log8(penumRef.getPenum().getElements().size());
+				offsetInBits += 32;
 			}
 		}
 
@@ -957,8 +929,11 @@ public class JByteByByteGenerator implements IGenerator {
 		/*
 		 * Now set the offset to a 4 byte word boundary
 		 */
-		int remainder = offsetInBytes % 4;
-		int pad = (remainder == 0 ? 0 : 4 - remainder);
+		// int remainder = offsetInBytes % 4;
+		// int pad = (remainder == 0 ? 0 : 4 - remainder);
+
+		// Add 4 bytes for the size of the directory
+		int pad = 4;
 
 		return offsetInBytes + pad;
 	}
@@ -1580,7 +1555,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "/*" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
-				+ " * Convert object to byte array." + LINE_SEPARATOR);
+				+ " * Convert object to byte array. The offset is in bytes."
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "int offset = 0;"
 				+ LINE_SEPARATOR);
@@ -1689,6 +1665,8 @@ public class JByteByByteGenerator implements IGenerator {
 			boolean isOptional = (penumRef.getOptional() != null);
 			if (isOptional == false) {
 				int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+				// TODO always an integer for now
+				sizeInBytes = 4;
 
 				toString = toString
 						.concat(getPad()
@@ -1710,17 +1688,17 @@ public class JByteByByteGenerator implements IGenerator {
 									+ toFirstUpper(penumRef.getName())
 									+ "().getId());" + LINE_SEPARATOR);
 				} else if (sizeInBytes > 2) {
-					toString = toString
-							.concat(getPad()
-									+ "bb = "
-									+ rootClass
-									+ "Utility.insertInteger(bb, offset, (int) this.get"
-									+ toFirstUpper(penumRef.getName())
-									+ "().getId());" + LINE_SEPARATOR);
+					toString = toString.concat(getPad() + "bb = " + rootClass
+							+ "Utility.insertInteger(bb, offset, this.get"
+							+ toFirstUpper(penumRef.getName()) + "().getId());"
+							+ LINE_SEPARATOR);
 				}
 
 				toString = toString.concat(getPad() + "offset += "
 						+ sizeInBytes + ";" + LINE_SEPARATOR);
+			} else {
+				toString = toString.concat(getPad() + "// "
+						+ penumRef.getName() + " is optional" + LINE_SEPARATOR);
 			}
 		}
 
@@ -1739,6 +1717,23 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad()
 				+ "log4j.debug(\"directorySize: \" + directorySize);"
 				+ LINE_SEPARATOR);
+
+		toString = toString.concat(LINE_SEPARATOR);
+
+		// Insert the directory size
+		toString = toString.concat(getPad() + "// Inserting directory size"
+				+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "log4j.debug(String.format(\"inserting directory size at offset %d\", (DIRECTORY_OFFSET - 4)));"
+						+ LINE_SEPARATOR);
+		toString = toString
+				.concat(getPad()
+						+ "bb = "
+						+ grammarName
+						+ "Utility.insertInteger(bb, DIRECTORY_OFFSET - 4, directorySize);"
+						+ LINE_SEPARATOR);
+
 		toString = toString.concat(LINE_SEPARATOR);
 
 		toString = toString.concat(getPad() + "if (directorySize != 0) {"
@@ -1920,8 +1915,8 @@ public class JByteByByteGenerator implements IGenerator {
 									+ "());" + LINE_SEPARATOR);
 							toString = toString
 									.concat(getPad()
-											+ "offset += length * "
-											+ (attribute.getAttributeType() == AttributeType.STRING == true ? "1"
+											+ "offset += "
+											+ (attribute.getAttributeType() == AttributeType.STRING == true ? "length * 1"
 													: getPrimitiveSize(attribute
 															.getAttributeType()
 															.getLiteral()))
@@ -1989,7 +1984,7 @@ public class JByteByByteGenerator implements IGenerator {
 										+ "());" + LINE_SEPARATOR);
 								toString = toString
 										.concat(getPad()
-												+ "offset += length * "
+												+ "offset += "
 												+ (attribute.getAttributeType() == AttributeType.STRING == true ? "1"
 														: getPrimitiveSize(attribute
 																.getAttributeType()
@@ -2141,12 +2136,12 @@ public class JByteByByteGenerator implements IGenerator {
 				toString = toString.concat(getPad() + "// bb = " + rootClass
 						+ "Utility.insertBitfield(bb, offset * 8, "
 						+ sizeInBits + ", get"
-						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
+						+ toFirstUpper(penumRef.getName()) + "().getId());"
 						+ LINE_SEPARATOR);
 
 				toString = toString.concat(getPad() + "bb = " + rootClass
 						+ "Utility.insertInteger(bb, offset, get"
-						+ toFirstUpper(penumRef.getName()) + "().ordinal());"
+						+ toFirstUpper(penumRef.getName()) + "().getId());"
 						+ LINE_SEPARATOR);
 
 				toString = toString.concat(getPad() + "offset += "
@@ -2341,18 +2336,36 @@ public class JByteByByteGenerator implements IGenerator {
 
 		toString = toString.concat(LINE_SEPARATOR);
 
-		// Get the directory
-		toString = toString.concat(getPad() + "// Get the directory"
+		toString = toString.concat(getPad() + "// Get the directory size"
 				+ LINE_SEPARATOR);
 		toString = toString
-				.concat(getPad() + "int directorySize = get"
-						+ toFirstUpper(className) + "DirectorySize();"
+				.concat(getPad()
+						+ "log4j.debug(\"DIRECTORY_OFFSET - 4: \" + (DIRECTORY_OFFSET - 4));"
+						+ LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "int directorySize = "
+				+ grammarName
+				+ "Utility.getInteger(ba, (DIRECTORY_OFFSET - 4) * 8);"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad()
+				+ "log4j.debug(\"directorySize: \" + directorySize);"
+				+ LINE_SEPARATOR);
+
+		toString = toString.concat(LINE_SEPARATOR);
+
+		// Get the directory
+		toString = toString
+				.concat(getPad()
+						+ "// Get the directory from the byte array and build a directory."
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "theDirectory = new " + rootClass
 				+ "DirectoryEntry[directorySize];" + LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "int dirOffset = DIRECTORY_OFFSET;" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
+
+		toString = toString.concat(getPad()
+				+ "// Get each item in the directory. The offset is in bytes."
+				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "for (int entry = 0 ; entry < directorySize; entry++) {"
 				+ LINE_SEPARATOR);
@@ -2386,6 +2399,10 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 
+		toString = toString
+				.concat(getPad()
+						+ "// Use the directory to extract each item from the byte array."
+						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "for (" + rootClass
 				+ "DirectoryEntry directoryEntry : theDirectory) {"
 				+ LINE_SEPARATOR);
@@ -2451,11 +2468,19 @@ public class JByteByByteGenerator implements IGenerator {
 						toString = toString.concat(getPad(1)
 								+ toFirstLower(className) + ".set"
 								+ toFirstUpper(attribute.getName()) + "("
-								+ getter + "(ba, offset"
-								+ (attribute.getAttributeType()
-
-								== AttributeType.STRING ? ", length" : "")
-								+ "));" + LINE_SEPARATOR);
+								+ getter + "(ba, offset");
+						/*
+						 * The Calendar object is a special case.
+						 */
+						if (attribute.getAttributeType() == AttributeType.CALENDAR) {
+							toString = toString.concat("* 8));"
+									+ LINE_SEPARATOR);
+						} else if (attribute.getAttributeType() == AttributeType.STRING) {
+							toString = toString.concat(", length));"
+									+ LINE_SEPARATOR);
+						} else {
+							toString = toString.concat("));" + LINE_SEPARATOR);
+						}
 						toString = toString.concat(getPad(0) + "}"
 								+ LINE_SEPARATOR);
 					} else {
@@ -2581,12 +2606,12 @@ public class JByteByByteGenerator implements IGenerator {
 				theLevel++;
 
 				// TODO for now, enums are stored as integers
-				toString = toString.concat(getPad() + "int ordinal = "
-						+ grammarName + "Utility.getInteger(ba,  offset);"
+				toString = toString.concat(getPad() + "int _id = "
+						+ grammarName + "Utility.getInteger(ba,  offset * 8);"
 						+ LINE_SEPARATOR);
 				toString = toString.concat(getPad() + toFirstLower(className)
 						+ ".set" + toFirstUpper(penumRef.getName()) + "("
-						+ penumRef.getPenum().getName() + ".toEnum(ordinal));"
+						+ penumRef.getPenum().getName() + ".toEnum(_id));"
 						+ LINE_SEPARATOR);
 
 				theLevel--;
@@ -3146,6 +3171,7 @@ public class JByteByByteGenerator implements IGenerator {
 			String name = penumRef.getName();
 			int sizeInBits = log2(penumRef.getPenum().getElements().size());
 			int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+			sizeInBytes = 4;
 			boolean isOptional = (penumRef.getOptional() != null);
 
 			if (id != 0) {
@@ -5816,6 +5842,7 @@ public class JByteByByteGenerator implements IGenerator {
 			String name = penumRef.getName();
 			int sizeInBits = log2(penumRef.getPenum().getElements().size());
 			int sizeInBytes = log8(penumRef.getPenum().getElements().size());
+			sizeInBytes = 4;
 			boolean isOptional = (penumRef.getOptional() != null);
 
 			if (id != 0) {
@@ -6230,23 +6257,18 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a boolean from a byte array given an offset in bits."
+						+ " * This method returns a boolean from a byte array given an offset in bytes."
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ "public static boolean getBoolean(byte[] byteArray, int offsetInBits) {"
+						+ "public static boolean getBoolean(byte[] byteArray, int offset) {"
 						+ LINE_SEPARATOR);
 		theLevel++;
-		toString = toString.concat(getPad() + "int index = offsetInBits / 8;"
+		toString = toString.concat(getPad() + "byte b = byteArray[offset];"
 				+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "byte b = byteArray[index];"
-				+ LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ "int bitPosition = 7 - offsetInBits % 8;" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString.concat(getPad()
-				+ "return ((b >> bitPosition) & 0x01) == 1 ? true : false;"
+		toString = toString.concat(getPad() + "return (b == 1 ? true : false);"
 				+ LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
@@ -6905,12 +6927,9 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 		theLevel++;
 		toString = toString.concat(LINE_SEPARATOR);
-		toString = toString
-				.concat(getPad()
-						+ "byte[] bytes = ByteBuffer.allocate(1).put((byte) (b == true ? 1 : 0)).array();"
-						+ LINE_SEPARATOR);
+
 		toString = toString.concat(getPad()
-				+ "byteArray = insertBytes(byteArray, offset, bytes);"
+				+ "byteArray[offset] = (byte) (b == true ? 1 : 0);"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return byteArray;"
@@ -9347,6 +9366,7 @@ public class JByteByByteGenerator implements IGenerator {
 				if (isOptional == false) {
 					int sizeInBytes = log8(penumRef.getPenum().getElements()
 							.size());
+					sizeInBytes = 4;
 
 					toString = toString.concat(getPad() + sizeVariable + " += "
 							+ sizeInBytes + ";" + LINE_SEPARATOR);
