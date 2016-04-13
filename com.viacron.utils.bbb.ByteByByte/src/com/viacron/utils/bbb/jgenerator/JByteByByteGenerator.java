@@ -1720,6 +1720,10 @@ public class JByteByByteGenerator implements IGenerator {
 
 		toString = toString.concat(LINE_SEPARATOR);
 
+		toString = toString.concat(getPad() + "if (directorySize != 0) {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+
 		// Insert the directory size
 		toString = toString.concat(getPad() + "// Inserting directory size"
 				+ LINE_SEPARATOR);
@@ -1735,10 +1739,6 @@ public class JByteByByteGenerator implements IGenerator {
 						+ LINE_SEPARATOR);
 
 		toString = toString.concat(LINE_SEPARATOR);
-
-		toString = toString.concat(getPad() + "if (directorySize != 0) {"
-				+ LINE_SEPARATOR);
-		theLevel++;
 
 		/*
 		 * Create the directory
@@ -2233,13 +2233,15 @@ public class JByteByByteGenerator implements IGenerator {
 
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad()
 				+ "log4j.debug(\"Leaving \" + CLAZZ + METHOD);"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return bb;" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
-
+		toString = toString.concat(LINE_SEPARATOR);
+		
 		toString = toString.concat(getPad() + "// Leaving " + METHOD
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
@@ -2339,16 +2341,22 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "// Get the directory size"
 				+ LINE_SEPARATOR);
 		toString = toString
-				.concat(getPad()
-						+ "log4j.debug(\"DIRECTORY_OFFSET - 4: \" + (DIRECTORY_OFFSET - 4));"
+				.concat(getPad() + "int directorySize = get"
+						+ toFirstUpper(className) + "DirectorySize();"
 						+ LINE_SEPARATOR);
-		toString = toString.concat(getPad() + "int directorySize = "
-				+ grammarName
-				+ "Utility.getInteger(ba, (DIRECTORY_OFFSET - 4) * 8);"
-				+ LINE_SEPARATOR);
+
 		toString = toString.concat(getPad()
 				+ "log4j.debug(\"directorySize: \" + directorySize);"
 				+ LINE_SEPARATOR);
+		
+		toString = toString.concat(getPad() + "if (directorySize != 0) {"
+				+ LINE_SEPARATOR);
+		theLevel++;
+		
+		toString = toString
+				.concat(getPad()
+						+ "log4j.debug(\"DIRECTORY_OFFSET - 4: \" + (DIRECTORY_OFFSET - 4));"
+						+ LINE_SEPARATOR);
 
 		toString = toString.concat(LINE_SEPARATOR);
 
@@ -2427,7 +2435,6 @@ public class JByteByByteGenerator implements IGenerator {
 				+ LINE_SEPARATOR);
 		toString = toString.concat(getPad(1) + "continue;" + LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
-		toString = toString.concat(LINE_SEPARATOR);
 
 		boolean isFirst = true;
 		for (AbstractAttribute abstractAttribute : attributes) {
@@ -2469,17 +2476,16 @@ public class JByteByByteGenerator implements IGenerator {
 								+ toFirstLower(className) + ".set"
 								+ toFirstUpper(attribute.getName()) + "("
 								+ getter + "(ba, offset");
+
 						/*
-						 * The Calendar object is a special case.
+						 * The String object is a special case.
 						 */
-						if (attribute.getAttributeType() == AttributeType.CALENDAR) {
-							toString = toString.concat("* 8));"
-									+ LINE_SEPARATOR);
-						} else if (attribute.getAttributeType() == AttributeType.STRING) {
+						if (attribute.getAttributeType() == AttributeType.STRING) {
 							toString = toString.concat(", length));"
 									+ LINE_SEPARATOR);
 						} else {
-							toString = toString.concat("));" + LINE_SEPARATOR);
+							toString = toString.concat("* 8));"
+									+ LINE_SEPARATOR);
 						}
 						toString = toString.concat(getPad(0) + "}"
 								+ LINE_SEPARATOR);
@@ -2619,6 +2625,8 @@ public class JByteByByteGenerator implements IGenerator {
 			}
 		}
 
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 
@@ -6257,7 +6265,7 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(getPad() + "/**" + LINE_SEPARATOR);
 		toString = toString
 				.concat(getPad()
-						+ " * This method returns a boolean from a byte array given an offset in bytes."
+						+ " * This method returns a boolean from a byte array given an offset in bits."
 						+ LINE_SEPARATOR);
 		toString = toString.concat(getPad() + " */" + LINE_SEPARATOR);
 		toString = toString
@@ -6265,7 +6273,7 @@ public class JByteByByteGenerator implements IGenerator {
 						+ "public static boolean getBoolean(byte[] byteArray, int offset) {"
 						+ LINE_SEPARATOR);
 		theLevel++;
-		toString = toString.concat(getPad() + "byte b = byteArray[offset];"
+		toString = toString.concat(getPad() + "byte b = byteArray[offset / 8];"
 				+ LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
 		toString = toString.concat(getPad() + "return (b == 1 ? true : false);"
@@ -6621,6 +6629,15 @@ public class JByteByByteGenerator implements IGenerator {
 						+ "public static byte[] insertBitfield(byte[] byteArray, int offsetInBits, int length, int value) {"
 						+ LINE_SEPARATOR);
 		theLevel++;
+
+		toString = toString.concat(getPad()
+				+ "if (offsetInBits % 8 == 0 && length == 1) {"
+				+ LINE_SEPARATOR);
+		toString = toString.concat(getPad(1)
+				+ "byteArray[offsetInBits/8] = (byte) value;" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
+		toString = toString.concat(getPad() + "else {" + LINE_SEPARATOR);
+		theLevel++;
 		toString = toString.concat(getPad()
 				+ "String binaryString = Integer.toBinaryString(value);"
 				+ LINE_SEPARATOR);
@@ -6680,6 +6697,8 @@ public class JByteByByteGenerator implements IGenerator {
 		toString = toString.concat(LINE_SEPARATOR);
 
 		toString = toString.concat(getPad() + "bitCounter++;" + LINE_SEPARATOR);
+		theLevel--;
+		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		theLevel--;
 		toString = toString.concat(getPad() + "}" + LINE_SEPARATOR);
 		toString = toString.concat(LINE_SEPARATOR);
