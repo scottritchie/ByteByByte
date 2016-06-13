@@ -42,7 +42,7 @@ public class Ungenerate {
 	private static String theRootClass;
 
 	//
-	private static final String BBB_INSTANCE_VARIABLES_MARKER = "* See buildInstanceVariables() in JBitByBitGenerator.java.";
+	private static final String BBB_INSTANCE_VARIABLES_MARKER = "* See buildInstanceVariables() in JByteByByteGenerator.java.";
 	private static final String SMB_INSTANCE_VARIABLES_MARKER = "* See buildInstanceVariables() in StringMessageBufferGenerator.xtend.";
 
 	private static final String BBB_END_OF_INSTANCE_VARIABLES_MARKER = "* This method gets the";
